@@ -5,8 +5,13 @@ public class MainView {
     private JFrame frame;
     private Board board;
     private BoardView boardView;
+    private JFrame startFrame;
 
     public MainView() {
+        this.startFrame = new JFrame("Dame Spiel");
+        this.startFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.startFrame.setSize(800, 600);
+        this.startFrame.setLayout(new BorderLayout());
         initialize();
     }
 
@@ -28,6 +33,18 @@ public class MainView {
         gameMenu.add(endItem);
         menuBar.add(gameMenu);
         frame.setJMenuBar(menuBar);
+
+        frame.setVisible(true);
+
+        resetItem.addActionListener(_ -> {
+            board.initialize();
+            updateBoard();
+        });
+
+        endItem.addActionListener(_ -> {
+            frame.dispose();
+            if (startFrame != null) startFrame.setVisible(true);
+        });
 
         frame.setVisible(true);
     }

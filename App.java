@@ -5,6 +5,9 @@ public class App {
         // Es steuert die Logik des Spiels und interagiert mit dem Modell
         // und der Ansicht.
         GameController gameController = new GameController();
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            new MainView();
+        });
         
         // Das Spiel starten
         gameController.startGame();
