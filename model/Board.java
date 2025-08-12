@@ -46,5 +46,16 @@ public class Board {
         }
     }
 
+    public Piece getPieceAt(int x, int y) {
+        return board[x][y];
+    }
+    public void setPieceAt(int x, int y, Piece piece) {
+        board[x][y] = piece;
+    }
+
+    public Piece[][] getBoard() {
+        return board;
+    }
+
 
 }
