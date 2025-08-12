@@ -8,7 +8,7 @@ public class Board {
     }
 
     private void initializeBoard() {
-        // Initialize the board with pieces in starting positions
+        // Initialisiere das Schachbrett mit den Anfangspositionen der Stücke
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
                 if ((i + j) % 2 != 0) {
@@ -27,7 +27,24 @@ public class Board {
     }
 
     public void initialize() {
-        // Reset the board to the initial state
+        // Neues Spiel initialisieren
         initializeBoard();
     }
+
+    public boolean isValidMove(int fromX, int fromY, int toX, int toY) {
+        // Prüfen, ob der Zug gültig ist
+        return true; // Platzhalter für die Boolean-Funktion
+    }
+
+    public void movePiece(int fromX, int fromY, int toX, int toY) {
+        // Logik, um ein Stück zu bewegen
+        Piece piece = board[fromX][fromY];
+        if (piece != null && piece.canMove(toX, toY)) {
+            board[toX][toY] = piece;
+            board[fromX][fromY] = null;
+            piece.move(toX, toY);
+        }
+    }
+
+
 }

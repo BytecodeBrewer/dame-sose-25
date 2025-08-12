@@ -23,11 +23,12 @@ public class Player {
     }
 
     public boolean hasWon() {
-        // Implement logic to check if the player has won
-        return pieces.isEmpty(); // Example condition
+        // Logik, um zu überprüfen, ob der Spieler gewonnen hat
+        // Zum Beispiel, wenn keine eigenen Stücke mehr vorhanden sind
+        return pieces.isEmpty(); // Beispielhafte Rückgabe
     }
 
     public void makeMove(Piece piece, int newX, int newY) {
-        // Implement logic for making a move
+        // Platzhalter für die Logik, um einen Zug zu machen
     }
 }

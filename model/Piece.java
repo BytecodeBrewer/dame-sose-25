@@ -26,11 +26,11 @@ public class Piece {
     }
 
     public void move(int newX, int newY) {
-        // Logic for moving the piece to a new position
+        // Spiel-Logik für das Bewegen des Stücks
     }
 
     public boolean canMove(int targetX, int targetY) {
-        // Logic to check if the piece can move to the target position
-        return true; // Placeholder return value
+        // Logik, um zu überprüfen, ob das Stück zu der angegebenen Position erlaubt ist
+        return true;
     }
 }

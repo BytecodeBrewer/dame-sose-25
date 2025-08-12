@@ -16,20 +16,22 @@ public class GameController {
         board.initialize();
     }
 
-    public boolean makeMove() {
-            return false;
+    public boolean makeMove(int fromX, int fromY, int toX, int toY) {
+            if (board.isValidMove(fromX, fromY, toX, toY)) {
+            board.movePiece(fromX, fromY, toX, toY);
+            switchPlayer();
+            return true;
+        }
+        return false;
+
         }
 
     public void resetGame() {
         board.initialize();
-        currentPlayer = player1; // Reset to the first player
+        currentPlayer = player1; // Zurücksetzen auf Spieler 1
     }
 
     private void switchPlayer() {
-        if (currentPlayer == player1) {
-            currentPlayer = player2;
-        } else {
-            currentPlayer = player1;
-        }
+        currentPlayer = (currentPlayer == player1) ? player2 : player1;
     }
 }

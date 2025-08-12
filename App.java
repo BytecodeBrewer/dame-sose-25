@@ -1,12 +1,13 @@
 public class App {
     public static void main(String[] args) {        
-        // Initialize the MVC components
+        // Controller für das Spiel erstellen
+        // Es ist das Kernstück des MVC Musters
+        // Es steuert die Logik des Spiels und interagiert mit dem Modell
+        // und der Ansicht.
         GameController gameController = new GameController();
         
-        // Start the game
+        // Das Spiel starten
         gameController.startGame();
-        System.out.println("Hello");
-
 
     }
 }
