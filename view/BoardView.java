@@ -3,38 +3,45 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class BoardView extends JPanel {
-    private Board board;
-    // Das MainView-Objekt, um die Ansicht zu aktualisieren
-    private int selectedX = -1, selectedY = -1;
+    private final GameController gameController;
+    private int selectedRow = -1;
+    private int selectedCol = -1;
 
-    public BoardView(Board board, MainView mainView) {
-        this.board = board;
+    public BoardView(GameController gameController) {
+        this.gameController = gameController;
 
         addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                int size = 8;
-                int tileSize = Math.min(getWidth(), getHeight()) / size;
-                int x = e.getY() / tileSize;
-                int y = e.getX() / tileSize;
+            @Override
+            public void mousePressed(MouseEvent e) {
+                int cellSize = Math.min(getWidth(), getHeight()) / 8;
+                int y = e.getX() / cellSize;
+                int x = e.getY() / cellSize;
 
-                if (selectedX == -1 && board.getPieceAt(x, y) != null) {
-                    selectedX = x;
-                    selectedY = y;
-                } else if (selectedX != -1) {
-                    if (board.isValidMove(selectedX, selectedY, x, y)) {
-                        board.movePiece(selectedX, selectedY, x, y);
+                // Für's Erste leer lassen – Controller übernimmt Validierung
+                if (selectedRow == -1 && selectedCol == -1) {
+                    Piece piece = gameController.getBoard().getPieceAt(x, y); //getBoard() nicht definiert
+                    if (piece != null) {
+                        selectedRow = x;
+                        selectedCol = y;
+                        repaint();
                     }
-                    selectedX = -1;
-                    selectedY = -1;
+                } else {
+                    // statt board.isValidMove → Controller
+                    boolean moved = gameController.makeMove(selectedRow, selectedCol, x, y);
+                    if (moved) {
+                        selectedRow = -1;
+                        selectedCol = -1;
+                        repaint();
+                    }
                 }
-                repaint();
             }
         });
     }
 
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (board == null) return;
+        Board currentBoard = gameController.getBoard(); //Board noch undefiniert
+        if (currentBoard == null) return;
 
         int size = 8;
         int tileSize = Math.min(getWidth(), getHeight()) / size;
@@ -50,7 +57,7 @@ public class BoardView extends JPanel {
                 g.fillRect(j * tileSize, i * tileSize, tileSize, tileSize);
 
                 // Steine zeichnen
-                Piece piece = board.getPieceAt(i, j);
+                Piece piece = currentBoard.getPieceAt(i, j);
                 if (piece != null) {
                     if ("black".equals(piece.getColor())) {
                         g.setColor(Color.BLACK);
@@ -62,6 +69,10 @@ public class BoardView extends JPanel {
             }
         }
     }
+    
+    
+    
 }
+
 
 //git testpush

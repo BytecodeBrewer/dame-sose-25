@@ -15,12 +15,12 @@ public class StartFrame extends JFrame {
         JButton startButton = new JButton("Start Game");
         JButton endButton = new JButton("End Game");
 
-        startButton.addActionListener(_ -> {
-            new MainView(); // Erstellt MainView ohne Parameter
+        startButton.addActionListener(s -> {
+            new MainView(null); // Erstellt MainView ohne Parameter
             setVisible(false);
         });
 
-        endButton.addActionListener(_ -> System.exit(0));
+        endButton.addActionListener(e -> System.exit(0));
 
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(2, 1, 10, 10));
