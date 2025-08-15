@@ -1,10 +1,37 @@
 public class Board {
     private Piece[][] board;
     private final int SIZE = 8;
+    private Player player1;
+    private Player player2;
 
     public Board() {
         board = new Piece[SIZE][SIZE];
+        player1 = new Player("Spieler 1");
+        player2 = new Player("Spieler 2");
         initializeBoard();
+    }
+
+    public boolean isFieldFree(int x, int y) {
+        // Überprüfen, ob das Feld frei ist
+        return board[x][y] == null;
+    }
+
+    public void occupyField(int x, int y, Piece piece) {
+        // Setzt ein Stück auf das angegebene Feld
+        if (isFieldFree(x, y)) {
+            board[x][y] = piece;
+        } else {
+            throw new IllegalArgumentException("Das Feld ist bereits besetzt.");
+        }
+    }
+
+    public void freeField(int x, int y) {
+        // Macht das angegebene Feld frei
+        if (!isFieldFree(x, y)) {
+            board[x][y] = null;
+        } else {
+            throw new IllegalArgumentException("Das Feld ist bereits frei.");
+        }
     }
 
     private void initializeBoard() {
@@ -13,14 +40,14 @@ public class Board {
             for (int j = 0; j < SIZE; j++) {
                 if ((i + j) % 2 != 0) {
                     if (i < 3) {
-                        board[i][j] = new Piece("black", "man");
+                        occupyField(i, j, new Piece("black", "man", player1));
                     } else if (i > 4) {
-                        board[i][j] = new Piece("white","man");
+                        occupyField(i, j, new Piece("white", "man", player2));
                     } else {
-                        board[i][j] = null;
+                        freeField(i, j);
                     }
                 } else {
-                    board[i][j] = null;
+                    freeField(i, j);
                 }
             }
         }
@@ -31,31 +58,12 @@ public class Board {
         initializeBoard();
     }
 
-    public boolean isValidMove(int fromX, int fromY, int toX, int toY) {
-        // Prüfen, ob der Zug gültig ist
-        return true; // Platzhalter für die Boolean-Funktion
-    }
-
-    public void movePiece(int fromX, int fromY, int toX, int toY) {
-        // Logik, um ein Stück zu bewegen
-        Piece piece = board[fromX][fromY];
-        if (piece != null && piece.canMove(toX, toY)) {
-            board[toX][toY] = piece;
-            board[fromX][fromY] = null;
-            piece.move(toX, toY);
-        }
-    }
-
     public Piece getPieceAt(int x, int y) {
         return board[x][y];
-    }
-    public void setPieceAt(int x, int y, Piece piece) {
-        board[x][y] = piece;
     }
 
     public Piece[][] getBoard() {
         return board;
     }
-
 
 }
