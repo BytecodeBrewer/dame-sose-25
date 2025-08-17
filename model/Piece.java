@@ -2,11 +2,13 @@ public class Piece {
     private String color;
     private String type;
     private boolean isCaptured;
+    private Player owner;
 
-    public Piece(String color, String type) {
+    public Piece(String color, String type, Player owner) {
         this.color = color;
         this.type = type;
         this.isCaptured = false;
+        this.owner = owner;
     }
 
     public String getColor() {
@@ -32,5 +34,9 @@ public class Piece {
     public boolean canMove(int targetX, int targetY) {
         // Logik, um zu überprüfen, ob das Stück zu der angegebenen Position erlaubt ist
         return true;
+    }
+
+    public Player getOwner() {
+        return owner;
     }
 }
