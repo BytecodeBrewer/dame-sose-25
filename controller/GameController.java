@@ -5,30 +5,53 @@ public class GameController {
     private Player currentPlayer;
 
     public GameController() {
-        this.board = new Board();
-        this.player1 = new Player("Player 1");
-        this.player2 = new Player("Player 2");
-        this.currentPlayer = player1;
+        this.player1 = new Player("Player 1"); // Weiß
+        this.player2 = new Player("Player 2"); // Schwarz
+        this.board = new Board(player1, player2);
+        this.currentPlayer = player1; // Weiß beginnt
+    }
 
+    public Player getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+    public Board getBoard() {
+        return board;
     }
 
     public void startGame() {
         board.initialize();
+        currentPlayer = player1; // Weiß beginnt immer
+    }
+
+    // Prüft, ob der Zug gültig ist: das startfeld enthält eine Spielfigur des aktuellen Spielers,
+    // das Zielfeld ist frei und die Bewegung ist laut Piece erlaubt
+    public boolean isValidMove(int fromX, int fromY, int toX, int toY) {
+        Piece piece = board.getPieceAt(fromX, fromY);
+        // Prüfe zuerst, ob überhaupt ein Stein vorhanden ist
+        if (piece == null) return false;
+        // Prüfe, ob der Stein dem aktuellen Spieler gehört
+        if (piece.getOwner() != currentPlayer) return false;
+        // Prüfe, ob das Zielfeld frei ist
+        if (!board.isFieldFree(toX, toY)) return false;
+        return piece.canMove(toX, toY);
     }
 
     public boolean makeMove(int fromX, int fromY, int toX, int toY) {
-            if (board.isValidMove(fromX, fromY, toX, toY)) {
-            board.movePiece(fromX, fromY, toX, toY);
+        if (isValidMove(fromX, fromY, toX, toY)) {
+            Piece piece = board.getPieceAt(fromX, fromY);
+            board.freeField(fromX, fromY);
+            board.occupyField(toX, toY, piece);
+            piece.move(toX, toY);
             switchPlayer();
             return true;
         }
         return false;
-
-        }
+    }
 
     public void resetGame() {
         board.initialize();
-        currentPlayer = player1; // Zurücksetzen auf Spieler 1
+        currentPlayer = player1;
     }
 
     private void switchPlayer() {
