@@ -22,13 +22,24 @@ public class Player {
         pieces.add(piece);
     }
 
+    public void removePiece(Piece piece) {
+        pieces.remove(piece);
+    }
+
     public boolean hasWon() {
-        // Logik, um zu überprüfen, ob der Spieler gewonnen hat
-        // Zum Beispiel, wenn keine eigenen Stücke mehr vorhanden sind
-        return pieces.isEmpty(); // Beispielhafte Rückgabe
+        // Beispiel: Spieler gewinnt, wenn der Gegner keine Figuren mehr hat
+        return pieces.isEmpty();
     }
 
     public void makeMove(Piece piece, int newX, int newY) {
-        // Platzhalter für die Logik, um einen Zug zu machen
+        piece.move(newX, newY);
+    }
+
+    public int getPieceCount() {
+        return pieces.size();
+    }
+
+    public boolean hasNoPieces() {
+        return pieces.isEmpty();
     }
 }
