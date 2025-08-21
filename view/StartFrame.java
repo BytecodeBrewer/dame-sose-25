@@ -1,8 +1,3 @@
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import java.awt.GridLayout;
-import java.awt.BorderLayout;
 import javax.swing.*;
 import java.awt.*;
 
@@ -14,7 +9,7 @@ public class StartFrame extends JFrame {
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setResizable(false);
+        setVisible(rootPaneCheckingEnabled);
 
         // Buttons
         JButton startButton = new JButton("Start Game");
@@ -29,16 +24,19 @@ public class StartFrame extends JFrame {
 
 
         // Button-Actions
-        startButton.addActionListener(s -> {
-            new MainView(this); // dein Spielfeld-Fenster
+        startButton.addActionListener(_ -> {
+            GameController gameController = new GameController();
+            MainView mainView = new MainView(gameController);
+            mainView.show();
             setVisible(false);
+            gameController.startGame();
         });
 
-        loadButton.addActionListener(l -> {
+        loadButton.addActionListener(_ -> {
             JOptionPane.showMessageDialog(this, "Load Game not implemented yet!");
         });
 
-        endButton.addActionListener(e -> System.exit(0));
+        endButton.addActionListener(_ -> System.exit(0));
 
         // Panel für Buttons
         JPanel panel = new JPanel(new GridLayout(3, 1, 10, 10));
@@ -53,6 +51,14 @@ public class StartFrame extends JFrame {
     // Wenn du das später mal brauchst, kannst du so das Menü starten:
     public void initialize() {
         // Setup für StartFrame, falls du noch extra Logik einfügen willst
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setResizable(false);
+        setTitle("Dame Spiel - Start");
+        setSize(800, 600);
+        setLayout(new BorderLayout());
+
     }
 
     public void display() {
