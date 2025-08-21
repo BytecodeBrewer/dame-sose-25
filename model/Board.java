@@ -180,40 +180,4 @@ public class Board {
         return x >= 0 && x < SIZE && y >= 0 && y < SIZE && selectedSquares[x][y];
     }
 
-    // Fügt einen Listener für Änderungen hinzu
-    public void addChangeListener(Runnable listener) {
-        if (!changeListeners.contains(listener)) {
-            changeListeners.add(listener);
-        }
-    }
-
-    // Markiert ein Feld als ausgewählt
-    public void selectSquare(int x, int y) {
-        // Validiere Koordinaten
-        if (x < 0 || x >= SIZE || y < 0 || y >= SIZE) {
-            return;
-        }
-
-        // Setze alle Felder zurück
-        for (int i = 0; i < SIZE; i++) {
-            for (int j = 0; j < SIZE; j++) {
-                selectedSquares[i][j] = false;
-            }
-        }
-        
-        selectedSquares[x][y] = true;
-        notifyChangeListeners();
-    }
-
-    // Benachrichtigt alle registrierten Listener
-    private void notifyChangeListeners() {
-        for (Runnable listener : changeListeners) {
-            listener.run();
-        }
-    }
-
-    // Prüft, ob ein Feld ausgewählt ist
-    public boolean isSquareSelected(int x, int y) {
-        return x >= 0 && x < SIZE && y >= 0 && y < SIZE && selectedSquares[x][y];
-    }
 }
