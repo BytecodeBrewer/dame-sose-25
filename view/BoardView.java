@@ -78,7 +78,11 @@ public class BoardView extends JPanel {
 
                 Piece piece = currentBoard.getPieceAt(i, j);
                 if (piece != null) {
-                    g.setColor("black".equals(piece.getColor()) ? Color.BLACK : Color.WHITE);
+                    if (piece.getColor() == Piece.PieceColor.BLACK) {
+                        g.setColor(Color.BLACK);
+                    } else {
+                        g.setColor(Color.WHITE);
+                    }
                     g.fillOval(j * tileSize + 10, i * tileSize + 10, tileSize - 20, tileSize - 20);
                 }
             }
