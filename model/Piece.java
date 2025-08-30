@@ -74,4 +74,5 @@ public class Piece {
     public Player getOwner() {
         return owner;
     }
+    //testing
 }
