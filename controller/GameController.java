@@ -61,4 +61,5 @@ public class GameController {
     private void switchPlayer() {
         currentPlayer = (currentPlayer == player1) ? player2 : player1;
     }
+    //testing
 }
