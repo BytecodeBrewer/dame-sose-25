@@ -39,6 +39,11 @@ public class Board {
         return board[x][y] == null;
     }
 
+    public boolean isFieldOccupiedByOpponent(int x, int y, Player player) {
+        Piece piece = board[x][y];
+        return piece != null && !piece.getOwner().equals(player);
+    }
+
     // Markiert das Feld als besetzt
     public void occupyField(int x, int y, Piece piece) {
         board[x][y] = piece;
@@ -51,10 +56,6 @@ public class Board {
 
     public Piece getPieceAt(int x, int y) {
         return board[x][y];
-    }
-    
-    public void setPieceAt(int x, int y, Piece piece) {
-        board[x][y] = piece;
     }
 
     public Piece[][] getBoard() {
