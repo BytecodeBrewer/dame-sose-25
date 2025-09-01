@@ -6,7 +6,7 @@ public class App {
         // und der Ansicht.
         GameController gameController = new GameController();
         javax.swing.SwingUtilities.invokeLater(() -> {
-            new MainView();
+            new MainView(null);
         });
         
         // Das Spiel starten
