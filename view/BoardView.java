@@ -32,9 +32,23 @@ public class BoardView extends JPanel {
                         repaint();
                     }
                 } else {
-                    boolean moved = gameController.makeMove(selectedRow, selectedCol, x, y);
+                    // Prüfe ob auf das gleiche Feld geklickt wurde
+                    if (x == selectedRow && y == selectedCol) {
+                        selectedRow = -1;
+                        selectedCol = -1;
+                        repaint();
+                        return;
+                    }
+                    
+                    // Prüfe ob auf ein besetztes Feld geklickt wurde
+                    if (!gameController.getBoard().isFieldFree(x, y)) {
+                        selectedRow = -1;
+                        selectedCol = -1;
+                        repaint();
+                        return;
+                    }
 
-                    // NEU: Move-Info an Controller (optional)
+                    boolean moved = gameController.makeMove(selectedRow, selectedCol, x, y);
                     gameController.onMoveAttempt(selectedRow, selectedCol, x, y, moved); // <--- EINZEILER
 
                     if (moved) {
@@ -64,7 +78,11 @@ public class BoardView extends JPanel {
 
                 Piece piece = currentBoard.getPieceAt(i, j);
                 if (piece != null) {
-                    g.setColor("black".equals(piece.getColor()) ? Color.BLACK : Color.WHITE);
+                    if (piece.getColor() == Piece.PieceColor.BLACK) {
+                        g.setColor(Color.BLACK);
+                    } else {
+                        g.setColor(Color.WHITE);
+                    }
                     g.fillOval(j * tileSize + 10, i * tileSize + 10, tileSize - 20, tileSize - 20);
                 }
             }

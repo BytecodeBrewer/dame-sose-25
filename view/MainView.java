@@ -1,18 +1,16 @@
 import javax.swing.*;
 import java.awt.*;
-import javax.swing.*;
-import java.awt.*;
 
 public class MainView {
     private final GameController gameController;
     private JFrame frame;
 
-    public MainView(StartFrame startFrame) {
-        this.gameController = new GameController();
-        initialize(startFrame);
+    public MainView(GameController gameController) {
+        this.gameController = gameController;
+        initialize();
     }
 
-    private void initialize(StartFrame startFrame) {
+    private void initialize() {
         frame = new JFrame("Dame");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -25,16 +23,14 @@ public class MainView {
         JMenuItem resetItem = new JMenuItem("Reset Game");
         JMenuItem endItem = new JMenuItem("End Game");
 
-        resetItem.addActionListener(r -> {
+        resetItem.addActionListener(_ -> {
             gameController.resetGame();
             boardView.repaint();
         });
 
-        endItem.addActionListener(e -> {
+        endItem.addActionListener(_ -> {
             frame.dispose();
-            if (startFrame != null) {
-                startFrame.setVisible(true);
-            }
+            // Hier könnte man eine Meldung anzeigen, dass das Spiel beendet wurde
         });
 
         gameMenu.add(resetItem);
@@ -46,6 +42,13 @@ public class MainView {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
-}
 
-//C:\Users\tuan_\eclipse-workspace\Dame_AOP
+
+    public void show() {
+        if (frame != null) {
+            frame.setVisible(true);
+        } else {
+            initialize();
+        }
+    }
+}
