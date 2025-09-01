@@ -8,57 +8,63 @@ public class BoardView extends JPanel {
     private int selectedRow = -1;
     private int selectedCol = -1;
 
+    // NEU: vom Controller setzbare Ziel-Felder (leuchten)
+    private List<Point> legalTargets = Collections.emptyList();
+
     public BoardView(GameController gameController) {
         this.gameController = gameController;
-
-        // NEU: Repaint automatisch, wenn Controller sagt "Board hat sich geändert"
-        gameController.addBoardChangeListener(() -> repaint()); // <--- EINZEILER
 
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
                 int cellSize = Math.min(getWidth(), getHeight()) / 8;
-                int y = e.getX() / cellSize; // <— Klarheit: Spalte
-                int x = e.getY() / cellSize; // <— Zeile
-
-                // NEU: Klick-Info an Controller (ohne Verhaltensänderung)
-                gameController.onSquareClicked(x, y); // <--- EINZEILER
+                int col = e.getX() / cellSize; // Spalte
+                int row = e.getY() / cellSize; // Zeile
 
                 if (selectedRow == -1 && selectedCol == -1) {
-                    Piece piece = gameController.getBoard().getPieceAt(x, y);
+                    Piece piece = gameController.getBoard().getPieceAt(row, col);
                     if (piece != null) {
-                        selectedRow = x;
-                        selectedCol = y;
+                        selectedRow = row;
+                        selectedCol = col;
                         repaint();
                     }
                 } else {
-                    // Prüfe ob auf das gleiche Feld geklickt wurde
-                    if (x == selectedRow && y == selectedCol) {
+                    // gleiches Feld -> Auswahl aufheben
+                    if (row == selectedRow && col == selectedCol) {
                         selectedRow = -1;
                         selectedCol = -1;
                         repaint();
                         return;
                     }
-                    
-                    // Prüfe ob auf ein besetztes Feld geklickt wurde
-                    if (!gameController.getBoard().isFieldFree(x, y)) {
+                    // Optional: besetztes Zielfeld -> Auswahl aufheben (keine Logik, nur Feedback)
+                    Piece dest = gameController.getBoard().getPieceAt(row, col);
+                    if (dest != null) {
                         selectedRow = -1;
                         selectedCol = -1;
                         repaint();
                         return;
                     }
 
-                    boolean moved = gameController.makeMove(selectedRow, selectedCol, x, y);
-                    gameController.onMoveAttempt(selectedRow, selectedCol, x, y, moved); // <--- EINZEILER
-
+                    boolean moved = gameController.makeMove(selectedRow, selectedCol, row, col);
                     if (moved) {
                         selectedRow = -1;
                         selectedCol = -1;
-                        repaint(); // (bleibt)
+                        repaint();
+                    } else {
+                        // ungültig -> Auswahl zurücksetzen (Fehlertext zeigt später MainView)
+                        selectedRow = -1;
+                        selectedCol = -1;
+                        repaint();
                     }
                 }
             }
         });
+    }
+
+    // NEU: vom Controller/außen setzbar – welche Felder sollen leuchten?
+    public void setLegalTargets(List<Point> targets) {
+        this.legalTargets = (targets != null) ? targets : Collections.emptyList();
+        repaint();
     }
 
     @Override
@@ -78,22 +84,54 @@ public class BoardView extends JPanel {
 
                 Piece piece = currentBoard.getPieceAt(i, j);
                 if (piece != null) {
-                    if (piece.getColor() == Piece.PieceColor.BLACK) {
-                        g.setColor(Color.BLACK);
-                    } else {
-                        g.setColor(Color.WHITE);
-                    }
+                    // Stein
+                    g.setColor(
+                        (piece.getColor() == Piece.PieceColor.BLACK) ? Color.BLACK : Color.WHITE
+                    );
                     g.fillOval(j * tileSize + 10, i * tileSize + 10, tileSize - 20, tileSize - 20);
+
+                    // NEU: Dame-Kennzeichnung "D" (falls dein Getter anders heißt, z. B. isDame(), bitte dort anpassen)
+                    try {
+                        // Annahme: Piece hat isKing()
+                        java.lang.reflect.Method m = piece.getClass().getMethod("isKing");
+                        Object r = m.invoke(piece);
+                        if (r instanceof Boolean && (Boolean) r) {
+                            g.setFont(g.getFont().deriveFont(Font.BOLD, Math.max(14f, tileSize * 0.5f)));
+                            g.setColor((piece.getColor() == Piece.PieceColor.BLACK) ? Color.WHITE : Color.BLACK);
+                            String text = "D";
+                            FontMetrics fm = g.getFontMetrics();
+                            int tx = j * tileSize + (tileSize - fm.stringWidth(text)) / 2;
+                            int ty = i * tileSize + (tileSize + fm.getAscent() - fm.getDescent()) / 2;
+                            g.drawString(text, tx, ty);
+                        }
+                    } catch (Exception ignore) {
+                        // falls es kein isKing() gibt, einfach nichts schreiben
+                    }
                 }
             }
         }
 
-        // MARKIERUNG: jetzt am ENDE (nachdem Brett/Steine gezeichnet wurden)
+        // Auswahl-Hervorhebung (oben drauf)
         if (selectedRow >= 0 && selectedCol >= 0) {
-            g.setColor(new Color(255, 255, 0, 120)); // halbtransparent
+            g.setColor(new Color(255, 255, 0, 120));
             g.fillRect(selectedCol * tileSize, selectedRow * tileSize, tileSize, tileSize);
             g.setColor(Color.RED);
             g.drawRect(selectedCol * tileSize, selectedRow * tileSize, tileSize - 1, tileSize - 1);
+        }
+
+        // NEU: Leuchtende Ziel-Felder (vom Controller via setLegalTargets gesetzt)
+        if (legalTargets != null && !legalTargets.isEmpty()) {
+            for (Point p : legalTargets) {
+                int r = p.x; // row
+                int c = p.y; // col
+                int cx = c * tileSize + tileSize / 2;
+                int cy = r * tileSize + tileSize / 2;
+                int rad = Math.max(6, tileSize / 6);
+                g.setColor(new Color(0, 255, 0, 160)); // grün, halbtransparent
+                g.fillOval(cx - rad, cy - rad, 2 * rad, 2 * rad);
+                g.setColor(new Color(0, 120, 0, 200));
+                g.drawOval(cx - rad, cy - rad, 2 * rad, 2 * rad);
+            }
         }
     }
 }
