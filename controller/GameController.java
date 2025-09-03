@@ -38,7 +38,7 @@ public class GameController {
         // Prüfe, ob das Zielfeld frei ist
         if (!board.isFieldFree(toX, toY))
             return false;
-        return piece.canMove(board, toX, toY, toY, toY);
+        return piece.canMove(board, toX, toY, fromX, fromY);
     }
 
     public boolean makeMove(int fromX, int fromY, int toX, int toY) {
@@ -51,6 +51,27 @@ public class GameController {
             return true;
         }
         return false;
+    }
+
+    public void addBoardChangeListener(Runnable listener) {
+        board.addChangeListener(listener);
+    }
+
+    public void onSquareClicked(int x, int y) {
+        // Diese Methode kann verwendet werden, um auf Klicks auf dem Brett zu reagieren
+        // z.B. um eine Auswahl anzuzeigen oder einen Zug vorzubereiten
+        board.selectSquare(x, y);
+    }
+
+    // ich halte diese Methode für nicht notwendig, da es eher etwas für Debugging
+    // ist. Daher soll es später entfernt werden
+    public void onMoveAttempt(int fromX, int fromY, int toX, int toY, boolean moved) {
+        // Diese Methode zeigt im Terminal die Zugversuche an
+        if (moved) {
+            System.out.println("Zug erfolgreich: " + fromX + "," + fromY + " -> " + toX + "," + toY);
+        } else {
+            System.out.println("Ungültiger Zug: " + fromX + "," + fromY + " -> " + toX + "," + toY);
+        }
     }
 
     public void resetGame() {
