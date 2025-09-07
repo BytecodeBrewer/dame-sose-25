@@ -131,7 +131,7 @@ public class Board {
         return true;
     }
 
-    private boolean outOfBounds(int x, int y) {
+    public boolean outOfBounds(int x, int y) {
         return x < 0 || x >= SIZE || y < 0 || y >= SIZE;
     }
 

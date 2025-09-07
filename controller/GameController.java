@@ -41,7 +41,16 @@ public class GameController {
         if (piece.getOwner() != currentPlayer)
             return false;
         
-        
+                // Prüfe ob ein Schlagzwang existiert
+        if (hasCaptureMoves(currentPlayer)) {
+            // Wenn Schlagzwang existiert, muss der Zug ein Schlagzug sein
+            System.err.println(fromX);
+            System.err.println(fromY);
+            System.err.println(toX);
+            System.err.println(toY);
+            return isValidCapture(fromX, fromY, toX, toY);
+        }
+
         // Prüfe, ob das Zielfeld frei ist
         if (!board.isFieldFree(toX, toY))
             return false;
@@ -56,14 +65,83 @@ public class GameController {
             if (piece.getColor() == Piece.PieceColor.BLACK && toX <= fromX) {
                 return false;
             }
+            return Math.abs(toX - fromX) == 1 && Math.abs(toY - fromY) == 1;
         }
         
         return piece.canMove(board, toX, toY, fromX, fromY);
     }
 
+    private boolean hasCaptureMoves(Player player) {
+        for (int x = 0; x < 8; x++) {
+            for (int y = 0; y < 8; y++) {
+                Piece piece = board.getPieceAt(x, y);
+                if (piece != null && piece.getOwner() == player) {
+                                    System.err.println(x);
+                        System.err.println(y);
+                    // Prüfe alle möglichen Schlagrichtungen
+                    if (canCaptureInAnyDirection(x, y)) {
+                        System.err.println(x);
+                        System.err.println(y);
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean canCaptureInAnyDirection(int x, int y) {
+        // Prüfe alle 4 möglichen Schlagrichtungen
+        int[][] directions = {{2,2}, {2,-2}, {-2,2}, {-2,-2}};
+
+        for (int[] dir : directions) {
+            if (board.outOfBounds(x + dir[0], y + dir[1])) {
+                continue;
+            }
+            int toX = x + dir[0];
+            int toY = y + dir[1];
+            System.err.println("toX: " +toX);
+            System.err.println("toY: " +toY);
+            
+            if (isValidCapture(x, y, toX, toY)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+        private boolean isValidCapture(int fromX, int fromY, int toX, int toY) {
+        
+        Piece piece = board.getPieceAt(fromX, fromY);
+        if (piece == null) return false;
+
+        // Prüfe ob Zielfeld frei ist und 2 Felder entfernt
+        if (!board.isFieldFree(toX, toY) || Math.abs(toX - fromX) != 2 || Math.abs(toY - fromY) != 2) {
+            return false;
+        }
+
+        // Position des zu schlagenden Steins
+        int captureX = (fromX + toX) / 2;
+        int captureY = (fromY + toY) / 2;
+        Piece capturedPiece = board.getPieceAt(captureX, captureY);
+
+        // Prüfe ob ein gegnerischer Stein geschlagen wird
+        return capturedPiece != null && capturedPiece.getOwner() != currentPlayer;
+    }
+
     public boolean makeMove(int fromX, int fromY, int toX, int toY) {
         if (isValidMove(fromX, fromY, toX, toY)) {
             Piece piece = board.getPieceAt(fromX, fromY);
+
+            // Führe Schlag aus wenn es ein Schlagzug ist
+            if (Math.abs(toX - fromX) == 2) {
+                int captureX = (fromX + toX) / 2;
+                int captureY = (fromY + toY) / 2;
+                Piece capturedPiece = board.getPieceAt(captureX, captureY);
+                board.freeField(captureX, captureY);
+                capturedPiece.getOwner().removePiece(capturedPiece);
+            }
+
             board.freeField(fromX, fromY);
             board.occupyField(toX, toY, piece);
             piece.move(board, fromX, fromY, toX, toY);
@@ -76,7 +154,11 @@ public class GameController {
                 }
             }
 
-            switchPlayer();
+            // Spielerwechsel nur wenn kein Mehrfachschlag möglich
+            if (!canCaptureInAnyDirection(toX, toY)) {
+                switchPlayer();
+            }
+
             if (mainView != null) {
                 mainView.clearError();  // NEU: Fehler zurücksetzen bei erfolgreichen Zügen
             }
