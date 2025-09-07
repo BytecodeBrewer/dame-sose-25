@@ -2,7 +2,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-
 public class Board {
     public enum ErrMes {
         NONE,
@@ -19,8 +18,9 @@ public class Board {
     // Neue Felder für Listener und Auswahl
     private List<Runnable> changeListeners = new ArrayList<>();
     private boolean[][] selectedSquares;
+    private boolean debugMode = false;
 
-    // Error handling 
+    // Error handling
     private ErrMes errmes = ErrMes.NONE;
     private Stack<Piece[][]> history = new Stack<>();
 
@@ -29,7 +29,20 @@ public class Board {
         this.player2 = player2;
         board = new Piece[SIZE][SIZE];
         selectedSquares = new boolean[SIZE][SIZE];
-        initializeBoard();
+        if (!debugMode) {
+            initializeBoard();
+        } else {
+            clearBoard();
+        }
+    }
+
+    public void clearBoard() {
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                board[i][j] = null;
+                selectedSquares[i][j] = false;
+            }
+        }
     }
 
     private void initializeBoard() {
@@ -63,6 +76,12 @@ public class Board {
         return board[x][y] == null;
     }
 
+    public boolean isFieldOccupiedByOpponent(int x, int y, Player player) {
+        Piece piece = board[x][y];
+        return piece != null && !piece.getOwner().equals(player);
+    }
+
+    // Markiert das Feld als besetzt
     public void occupyField(int x, int y, Piece piece) {
         board[x][y] = piece;
     }
@@ -163,7 +182,7 @@ public class Board {
                 selectedSquares[i][j] = false;
             }
         }
-        
+
         selectedSquares[x][y] = true;
         notifyChangeListeners();
     }
@@ -178,6 +197,27 @@ public class Board {
     // Prüft, ob ein Feld ausgewählt ist
     public boolean isSquareSelected(int x, int y) {
         return x >= 0 && x < SIZE && y >= 0 && y < SIZE && selectedSquares[x][y];
+    }
+
+    // Logik für das Platzieren von Figuren
+    public void placeNormalPieceWhite(int x, int y) {
+        Piece piece = new Piece(Piece.PieceColor.WHITE, Piece.PieceType.MAN, null, x, y);
+        board[x][y] = piece;
+    }
+
+    public void placeNormalPieceBlack(int x, int y) {
+        Piece piece = new Piece(Piece.PieceColor.BLACK, Piece.PieceType.MAN, null, x, y);
+        board[x][y] = piece;
+    }
+
+    public void placeKingPieceWhite(int x, int y) {
+        Piece piece = new Piece(Piece.PieceColor.WHITE, Piece.PieceType.DAME, null, x, y);
+        board[x][y] = piece;
+    }
+
+    public void placeKingPieceBlack(int x, int y) {
+        Piece piece = new Piece(Piece.PieceColor.BLACK, Piece.PieceType.DAME, null, x, y);
+        board[x][y] = piece;
     }
 
 }

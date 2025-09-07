@@ -26,9 +26,16 @@ public class Player {
         pieces.remove(piece);
     }
 
-    public boolean hasWon() {
-        // Beispiel: Spieler gewinnt, wenn der Gegner keine Figuren mehr hat
-        return pieces.isEmpty();
+    public boolean hasWon(Player opponent, Board board) {
+        if (opponent.hasNoPieces()) {
+            return true;
+        }
+        for (Piece piece : opponent.getPieces()) {
+            if (piece.canMoveAnywhere(board)) {
+                return false; // Opponent can still move
+            }
+        }
+        return true; // Opponent has no moves left
     }
 
     public void makeMove(Piece piece, int newX, int newY) {

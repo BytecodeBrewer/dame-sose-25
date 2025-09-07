@@ -24,17 +24,21 @@ public class GameController {
         currentPlayer = player1; // Weiß beginnt immer
     }
 
-    // Prüft, ob der Zug gültig ist: das startfeld enthält eine Spielfigur des aktuellen Spielers,
+    // Prüft, ob der Zug gültig ist: das startfeld enthält eine Spielfigur des
+    // aktuellen Spielers,
     // das Zielfeld ist frei und die Bewegung ist laut Piece erlaubt
     public boolean isValidMove(int fromX, int fromY, int toX, int toY) {
         Piece piece = board.getPieceAt(fromX, fromY);
         // Prüfe zuerst, ob überhaupt ein Stein vorhanden ist
-        if (piece == null) return false;
+        if (piece == null)
+            return false;
         // Prüfe, ob der Stein dem aktuellen Spieler gehört
-        if (piece.getOwner() != currentPlayer) return false;
+        if (piece.getOwner() != currentPlayer)
+            return false;
         // Prüfe, ob das Zielfeld frei ist
-        if (!board.isFieldFree(toX, toY)) return false;
-        return piece.canMove(toX, toY);
+        if (!board.isFieldFree(toX, toY))
+            return false;
+        return piece.canMove(board, toX, toY, fromX, fromY);
     }
 
     public boolean makeMove(int fromX, int fromY, int toX, int toY) {
@@ -42,13 +46,12 @@ public class GameController {
             Piece piece = board.getPieceAt(fromX, fromY);
             board.freeField(fromX, fromY);
             board.occupyField(toX, toY, piece);
-            piece.move(toX, toY);
+            piece.move(board, fromX, fromY, toX, toY);
             switchPlayer();
             return true;
         }
         return false;
     }
-
 
     public void addBoardChangeListener(Runnable listener) {
         board.addChangeListener(listener);
@@ -60,7 +63,8 @@ public class GameController {
         board.selectSquare(x, y);
     }
 
-    // ich halte diese Methode für nicht notwendig, da es eher etwas für Debugging ist. Daher soll es später entfernt werden
+    // ich halte diese Methode für nicht notwendig, da es eher etwas für Debugging
+    // ist. Daher soll es später entfernt werden
     public void onMoveAttempt(int fromX, int fromY, int toX, int toY, boolean moved) {
         // Diese Methode zeigt im Terminal die Zugversuche an
         if (moved) {
