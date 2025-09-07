@@ -13,6 +13,7 @@ public class MainView {
     public MainView(StartFrame startFrame) {
         this.startFrame = startFrame;
         this.gameController = new GameController();
+        this.gameController.setMainView(this);  // NEU: View beim Controller registrieren
         initialize();
     }
 
@@ -25,7 +26,7 @@ public class MainView {
 
         // --- NEU: Status-/Fehlerleiste unten
         JPanel statusPanel = new JPanel(new BorderLayout(10, 0));
-        currentPlayerLabel = new JLabel("Am Zug: —");
+        currentPlayerLabel = new JLabel("Am Zug: " + gameController.getCurrentPlayer().getName());
         errorLabel = new JLabel(" "); // leerer Platzhalter
         errorLabel.setForeground(Color.RED);
         statusPanel.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));

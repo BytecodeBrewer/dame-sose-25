@@ -3,12 +3,17 @@ public class GameController {
     private Player player1;
     private Player player2;
     private Player currentPlayer;
+    private MainView mainView;
 
     public GameController() {
         this.player1 = new Player("Player 1"); // Weiß
         this.player2 = new Player("Player 2"); // Schwarz
         this.board = new Board(player1, player2);
         this.currentPlayer = player1; // Weiß beginnt
+    }
+
+    public void setMainView(MainView mainView) {
+        this.mainView = mainView;
     }
 
     public Player getCurrentPlayer() {
@@ -35,9 +40,24 @@ public class GameController {
         // Prüfe, ob der Stein dem aktuellen Spieler gehört
         if (piece.getOwner() != currentPlayer)
             return false;
+        
+        
         // Prüfe, ob das Zielfeld frei ist
         if (!board.isFieldFree(toX, toY))
             return false;
+            // Prüfe Bewegungsrichtung für normale Steine
+        
+        if (piece.getType() == Piece.PieceType.MAN) {
+            // Weiße Steine dürfen nur nach oben
+            if (piece.getColor() == Piece.PieceColor.WHITE && toX >= fromX) {
+                return false;
+            }
+            // Schwarze Steine dürfen nur nach unten
+            if (piece.getColor() == Piece.PieceColor.BLACK && toX <= fromX) {
+                return false;
+            }
+        }
+        
         return piece.canMove(board, toX, toY, fromX, fromY);
     }
 
@@ -47,10 +67,27 @@ public class GameController {
             board.freeField(fromX, fromY);
             board.occupyField(toX, toY, piece);
             piece.move(board, fromX, fromY, toX, toY);
+
+            // Prüfe Promotion
+            if (piece.getType() == Piece.PieceType.MAN) {
+                if ((piece.getColor() == Piece.PieceColor.WHITE && toX == 0) ||
+                    (piece.getColor() == Piece.PieceColor.BLACK && toX == 7)) {
+                    board.promotetoDame(toX, toY);
+                }
+            }
+
             switchPlayer();
+            if (mainView != null) {
+                mainView.clearError();  // NEU: Fehler zurücksetzen bei erfolgreichen Zügen
+            }
             return true;
+        } else {
+            // NEU: Fehlermeldung anzeigen
+            if (mainView != null) {
+                mainView.showError("Ungültiger Zug!");
+            }
+            return false;
         }
-        return false;
     }
 
     public void addBoardChangeListener(Runnable listener) {
@@ -77,9 +114,16 @@ public class GameController {
     public void resetGame() {
         board.initialize();
         currentPlayer = player1;
+        // NEU: Aktualisiere Spieleranzeige nach Reset
+        if (mainView != null) {
+            mainView.setCurrentPlayerDisplay(currentPlayer.getName());
+        }
     }
 
     private void switchPlayer() {
         currentPlayer = (currentPlayer == player1) ? player2 : player1;
+        if (mainView != null) {
+            mainView.setCurrentPlayerDisplay(currentPlayer.getName());
+        }
     }
 }
