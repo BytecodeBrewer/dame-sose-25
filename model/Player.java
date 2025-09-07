@@ -22,13 +22,31 @@ public class Player {
         pieces.add(piece);
     }
 
-    public boolean hasWon() {
-        // Logik, um zu überprüfen, ob der Spieler gewonnen hat
-        // Zum Beispiel, wenn keine eigenen Stücke mehr vorhanden sind
-        return pieces.isEmpty(); // Beispielhafte Rückgabe
+    public void removePiece(Piece piece) {
+        pieces.remove(piece);
+    }
+
+    public boolean hasWon(Player opponent, Board board) {
+        if (opponent.hasNoPieces()) {
+            return true;
+        }
+        for (Piece piece : opponent.getPieces()) {
+            if (piece.canMoveAnywhere(board)) {
+                return false; // Opponent can still move
+            }
+        }
+        return true; // Opponent has no moves left
     }
 
     public void makeMove(Piece piece, int newX, int newY) {
-        // Platzhalter für die Logik, um einen Zug zu machen
+        piece.move(newX, newY);
+    }
+
+    public int getPieceCount() {
+        return pieces.size();
+    }
+
+    public boolean hasNoPieces() {
+        return pieces.isEmpty();
     }
 }
