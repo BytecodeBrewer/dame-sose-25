@@ -24,16 +24,16 @@ public class StartFrame extends JFrame {
 
 
         // Button-Actions
-        startButton.addActionListener(s -> {
+        startButton.addActionListener(_ -> {
             new MainView(this);
             setVisible(false);
         });
 
-        loadButton.addActionListener(l -> {
+        loadButton.addActionListener(_ -> {
             JOptionPane.showMessageDialog(this, "Load Game not implemented yet!");
         });
 
-        endButton.addActionListener(e -> System.exit(0));
+        endButton.addActionListener(_ -> System.exit(0));
 
         // Panel für Buttons
         JPanel panel = new JPanel(new GridLayout(3, 1, 10, 10));

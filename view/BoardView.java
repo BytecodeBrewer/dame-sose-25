@@ -1,6 +1,8 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Collections;
+import java.util.List;
 
 
 public class BoardView extends JPanel {

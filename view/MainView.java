@@ -39,7 +39,7 @@ public class MainView {
         JMenuItem resetItem = new JMenuItem("Reset Game");
         JMenuItem endItem   = new JMenuItem("End Game");
 
-        resetItem.addActionListener(r -> {
+        resetItem.addActionListener(_ -> {
             gameController.resetGame();
             // Option: Fehlermeldung zurücksetzen & Spieleranzeige ggf. aktualisieren
             clearError();
@@ -47,7 +47,7 @@ public class MainView {
             frame.repaint();
         });
 
-        endItem.addActionListener(e -> {
+        endItem.addActionListener(_ -> {
             frame.dispose();
             if (startFrame != null) {
                 startFrame.setVisible(true);
