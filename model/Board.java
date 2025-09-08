@@ -19,6 +19,8 @@ public class Board {
     private List<Runnable> changeListeners = new ArrayList<>();
     private boolean[][] selectedSquares;
     private boolean debugMode = false;
+    private int capturedWhitePiecesCount = 0;
+    private int capturedBlackPiecesCount = 0;
 
     // Error handling
     private ErrMes errmes = ErrMes.NONE;
@@ -192,6 +194,22 @@ public class Board {
         for (Runnable listener : changeListeners) {
             listener.run();
         }
+    }
+
+    public int getCapturedWhitePiecesCount() {
+        return capturedWhitePiecesCount;
+    }
+
+    public int getCapturedBlackPiecesCount() {
+        return capturedBlackPiecesCount;
+    }
+
+    public void incrementCapturedWhitePieces() {
+        capturedWhitePiecesCount++;
+    }
+
+    public void incrementCapturedBlackPieces() {
+        capturedBlackPiecesCount++;
     }
 
     // Prüft, ob ein Feld ausgewählt ist

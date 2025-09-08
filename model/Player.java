@@ -4,10 +4,12 @@ import java.util.ArrayList;
 public class Player {
     private String name;
     private List<Piece> pieces;
+    private boolean hasWon;
 
     public Player(String name) {
         this.name = name;
         this.pieces = new ArrayList<>();
+        this.hasWon = false;
     }
 
     public String getName() {
@@ -36,6 +38,14 @@ public class Player {
             }
         }
         return true; // Opponent has no moves left
+    }
+
+    public boolean getHasWon() {
+        return hasWon;
+    }
+
+    public void setHasWon(boolean hasWon) {
+        this.hasWon = hasWon;
     }
 
     public void makeMove(Piece piece, int newX, int newY) {
