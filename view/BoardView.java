@@ -78,54 +78,49 @@ public class BoardView extends JPanel {
         int size = 8;
         int tileSize = Math.min(getWidth(), getHeight()) / size;
 
-        // Brett + Steine
+        // 1) Brett + Auswahl (gelb) + Stein (in dieser Reihenfolge)
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
+                // Feld
                 g.setColor(((i + j) % 2 == 0) ? Color.LIGHT_GRAY : Color.DARK_GRAY);
                 g.fillRect(j * tileSize, i * tileSize, tileSize, tileSize);
 
+                // AUSWAHL-Highlight UNTER DEM STEIN (nur die gelbe Fläche)
+                if (selectedRow == i && selectedCol == j) {
+                    g.setColor(new Color(255, 255, 0, 120)); // halbtransparentes Gelb
+                    g.fillRect(j * tileSize, i * tileSize, tileSize, tileSize);
+                }
+
+                // Stein
                 Piece piece = currentBoard.getPieceAt(i, j);
                 if (piece != null) {
-                    // Stein
-                    g.setColor(
-                        (piece.getColor() == Piece.PieceColor.BLACK) ? Color.BLACK : Color.WHITE
-                    );
+                    g.setColor((piece.getColor() == Piece.PieceColor.BLACK) ? Color.BLACK : Color.WHITE);
                     g.fillOval(j * tileSize + 10, i * tileSize + 10, tileSize - 20, tileSize - 20);
 
-                    // NEU: Dame-Kennzeichnung "D" (falls dein Getter anders heißt, z. B. isDame(), bitte dort anpassen)
-                    try {
-                        // Annahme: Piece hat isKing()
-                        java.lang.reflect.Method m = piece.getClass().getMethod("isKing");
-                        Object r = m.invoke(piece);
-                        if (r instanceof Boolean && (Boolean) r) {
-                            g.setFont(g.getFont().deriveFont(Font.BOLD, Math.max(14f, tileSize * 0.5f)));
-                            g.setColor((piece.getColor() == Piece.PieceColor.BLACK) ? Color.WHITE : Color.BLACK);
-                            String text = "D";
-                            FontMetrics fm = g.getFontMetrics();
-                            int tx = j * tileSize + (tileSize - fm.stringWidth(text)) / 2;
-                            int ty = i * tileSize + (tileSize + fm.getAscent() - fm.getDescent()) / 2;
-                            g.drawString(text, tx, ty);
-                        }
-                    } catch (Exception ignore) {
-                        // falls es kein isKing() gibt, einfach nichts schreiben
+                    // Dame-Kennzeichnung (Krone ♕ oder "D")
+                    if (piece.isDame()) {
+                        g.setFont(g.getFont().deriveFont(Font.BOLD, Math.max(14f, tileSize * 0.6f)));
+                        g.setColor((piece.getColor() == Piece.PieceColor.BLACK) ? Color.WHITE : Color.BLACK);
+                        String text = "\u2655"; // ♕  (alternativ: "D")
+                        FontMetrics fm = g.getFontMetrics();
+                        int tx = j * tileSize + (tileSize - fm.stringWidth(text)) / 2;
+                        int ty = i * tileSize + (tileSize + fm.getAscent() - fm.getDescent()) / 2;
+                        g.drawString(text, tx, ty);
                     }
                 }
             }
         }
 
-        // Auswahl-Hervorhebung (oben drauf)
+        // 2) Optional: Roter Rand ÜBER allem (damit klar sichtbar)
         if (selectedRow >= 0 && selectedCol >= 0) {
-            g.setColor(new Color(255, 255, 0, 120));
-            g.fillRect(selectedCol * tileSize, selectedRow * tileSize, tileSize, tileSize);
             g.setColor(Color.RED);
             g.drawRect(selectedCol * tileSize, selectedRow * tileSize, tileSize - 1, tileSize - 1);
         }
 
-        // NEU: Leuchtende Ziel-Felder (vom Controller via setLegalTargets gesetzt)
+        // 3) Leuchtende Ziel-Felder (über allem)
         if (legalTargets != null && !legalTargets.isEmpty()) {
             for (Point p : legalTargets) {
-                int r = p.x; // row
-                int c = p.y; // col
+                int r = p.x, c = p.y;
                 int cx = c * tileSize + tileSize / 2;
                 int cy = r * tileSize + tileSize / 2;
                 int rad = Math.max(6, tileSize / 6);
