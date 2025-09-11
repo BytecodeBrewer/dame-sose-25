@@ -47,6 +47,7 @@ public class MainView {
         statusPanel.add(currentPlayerLabel, BorderLayout.WEST);
         statusPanel.add(errorLabel, BorderLayout.EAST);
         frame.add(statusPanel, BorderLayout.SOUTH);
+        
         if(mode != null) {
             pieceSelectionPanel = new JPanel(new GridLayout(1, 2, 10, 0));
             JButton startButton = new JButton("Start Game");
@@ -116,7 +117,6 @@ public class MainView {
         frame.setSize(800, 600);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-        gameController.checkAndAnnounceWinnerNow();
         setCurrentPlayerDisplay(gameController.getCurrentPlayer().getName()); //Anzeige dafür wer Dran ist
 
     }

@@ -18,7 +18,6 @@ public class Board {
     // Neue Felder für Listener und Auswahl
     private List<Runnable> changeListeners = new ArrayList<>();
     private boolean[][] selectedSquares;
-    private boolean debugMode = false;
     private int capturedWhitePiecesCount = 0;
     private int capturedBlackPiecesCount = 0;
 
@@ -31,11 +30,6 @@ public class Board {
         this.player2 = player2;
         board = new Piece[SIZE][SIZE];
         selectedSquares = new boolean[SIZE][SIZE];
-        if (!debugMode) {
-            initializeBoard();
-        } else {
-            clearBoard();
-        }
     }
 
     private void clearBoard() {
@@ -48,6 +42,7 @@ public class Board {
     }
 
     private void initializeBoard() {
+        System.out.println(" Steine für Spieler 1 (Weiß) gesetzt."); 
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
                 selectedSquares[i][j] = false;

@@ -40,16 +40,12 @@ public class GameController {
 
     public void startDebugMode() {
         board.getClearBoard();
-        player1.getPieces().clear();           // <<< NEU: Spielerlisten leeren
-        player2.getPieces().clear();           // <<< NEU
-        player1.setHasWon(false);              // optional sauber halten
-        player2.setHasWon(false);              // optional
-        currentPlayer = player1; // Weiß beginnt
+        currentPlayer = player1;
     }
 
     public void startGame() {
         board.initialize();
-        currentPlayer = player1; // Weiß beginnt immer
+        currentPlayer = player1;
     }
 
     // Prüft, ob der Zug gültig ist: das startfeld enthält eine Spielfigur des
@@ -254,7 +250,7 @@ public class GameController {
         if ("debug".equals(convertMode)) {
             board.getClearBoard();
         } else {
-            board.initialize();
+            //board.initialize();
         }
         currentPlayer = player1;
         // NEU: Aktualisiere Spieleranzeige nach Reset
