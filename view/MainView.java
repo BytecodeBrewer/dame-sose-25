@@ -9,6 +9,7 @@ public class MainView {
     // NEU: Status & Fehler
     private JLabel currentPlayerLabel; // "Am Zug: ..."
     private JLabel errorLabel;         // Platzhalter für Fehlermeldungen
+    private JLabel showWinnerLabel; // Platzhalter für Gewinneranzeige
 
     public MainView(StartFrame startFrame) {
         this.startFrame = startFrame;
@@ -40,7 +41,7 @@ public class MainView {
         JMenuItem resetItem = new JMenuItem("Reset Game");
         JMenuItem endItem   = new JMenuItem("End Game");
 
-        resetItem.addActionListener(r -> {
+        resetItem.addActionListener(_ -> {
             gameController.resetGame();
             // Option: Fehlermeldung zurücksetzen & Spieleranzeige ggf. aktualisieren
             clearError();
@@ -48,7 +49,7 @@ public class MainView {
             frame.repaint();
         });
 
-        endItem.addActionListener(e -> {
+        endItem.addActionListener(_ -> {
             frame.dispose();
             if (startFrame != null) {
                 startFrame.setVisible(true);
@@ -85,21 +86,38 @@ public class MainView {
     }
     
     public void showWinnerDialog(String winnerName) {
-        GameOver dlg = new GameOver(
-            frame,
-            winnerName,
-            // onReset:
-            () -> {
-                gameController.resetGame();
-                clearError();
-                frame.repaint();
-            },
-            // onEnd:
-            () -> {
-                frame.dispose();
-                if (startFrame != null) startFrame.setVisible(true);
+        JDialog dlg = new JDialog(frame, "Spielende", true);
+        dlg.setSize(300, 200);
+
+        frame = new JFrame("Dame");
+        showWinnerLabel = new JLabel("Gewonnen hat: " + winnerName);
+        showWinnerLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+
+        JPanel buttonPanel = new JPanel();
+        JButton resetButton = new JButton("Neues Spiel");
+        JButton endButton = new JButton("Beenden");
+        buttonPanel.add(resetButton);
+        buttonPanel.add(endButton);
+
+        resetButton.addActionListener(_ -> {
+            gameController.resetGame();
+            clearError();
+            dlg.dispose();
+        });
+
+        endButton.addActionListener(_ -> {
+            dlg.dispose();
+            frame.dispose();
+            if (startFrame != null) {
+                startFrame.setVisible(true);
             }
-        );
+        });
+
+        dlg.setLayout(new BorderLayout());
+        dlg.add(showWinnerLabel, BorderLayout.CENTER);
+        dlg.add(buttonPanel, BorderLayout.SOUTH);
+        dlg.setLocationRelativeTo(frame);
         dlg.setVisible(true);
     }
     
