@@ -4,18 +4,12 @@ import java.util.ArrayList;
 public class Player {
     private String name;
     private List<Piece> pieces;
-<<<<<<< HEAD
-=======
     private boolean hasWon;
->>>>>>> origin/model/Getter-Setter-Scoreboard
 
     public Player(String name) {
         this.name = name;
         this.pieces = new ArrayList<>();
-<<<<<<< HEAD
-=======
         this.hasWon = false;
->>>>>>> origin/model/Getter-Setter-Scoreboard
     }
 
     public String getName() {
@@ -46,8 +40,6 @@ public class Player {
         return true; // Opponent has no moves left
     }
 
-<<<<<<< HEAD
-=======
     public boolean getHasWon() {
         return hasWon;
     }
@@ -56,7 +48,6 @@ public class Player {
         this.hasWon = hasWon;
     }
 
->>>>>>> origin/model/Getter-Setter-Scoreboard
     public void makeMove(Piece piece, int newX, int newY) {
         piece.move(newX, newY);
     }

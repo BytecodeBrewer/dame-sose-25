@@ -19,11 +19,8 @@ public class Board {
     private List<Runnable> changeListeners = new ArrayList<>();
     private boolean[][] selectedSquares;
     private boolean debugMode = false;
-<<<<<<< HEAD
-=======
     private int capturedWhitePiecesCount = 0;
     private int capturedBlackPiecesCount = 0;
->>>>>>> origin/model/Getter-Setter-Scoreboard
 
     // Error handling
     private ErrMes errmes = ErrMes.NONE;
@@ -199,8 +196,6 @@ public class Board {
         }
     }
 
-<<<<<<< HEAD
-=======
     public int getCapturedWhitePiecesCount() {
         return capturedWhitePiecesCount;
     }
@@ -217,7 +212,6 @@ public class Board {
         capturedBlackPiecesCount++;
     }
 
->>>>>>> origin/model/Getter-Setter-Scoreboard
     // Prüft, ob ein Feld ausgewählt ist
     public boolean isSquareSelected(int x, int y) {
         return x >= 0 && x < SIZE && y >= 0 && y < SIZE && selectedSquares[x][y];
