@@ -100,113 +100,115 @@ public class GameController {
         return false;
     }
 
-        private boolean isValidCapture(int fromX, int fromY, int toX, int toY) {
-    Piece piece = board.getPieceAt(fromX, fromY);
-    if (piece == null) return false;
+    private boolean isValidCapture(int fromX, int fromY, int toX, int toY) {
+        Piece piece = board.getPieceAt(fromX, fromY);
+        if (piece == null) return false;
 
-    // Ziel muss frei sein und Diagonale bleiben
-    if (!board.isFieldFree(toX, toY)) return false;
-    int dx = toX - fromX;
-    int dy = toY - fromY;
-    if (Math.abs(dx) != Math.abs(dy)) return false;
+        // Ziel muss frei sein und Diagonale bleiben
+        if (!board.isFieldFree(toX, toY)) return false;
+        int dx = toX - fromX;
+        int dy = toY - fromY;
+        if (Math.abs(dx) != Math.abs(dy)) return false;
 
-    if (piece.getType() == Piece.PieceType.MAN) {
-        // Klassischer 2er-Sprung
-        if (Math.abs(dx) != 2 || Math.abs(dy) != 2) return false;
-        int mx = (fromX + toX) / 2;
-        int my = (fromY + toY) / 2;
-        Piece mid = board.getPieceAt(mx, my);
-        return mid != null && mid.getOwner() != currentPlayer;
-    } else {
-        // Dame: "fliegender" Schlag – genau EINE gegnerische Figur auf dem Weg
-        int stepx = Integer.signum(dx);
-        int stepy = Integer.signum(dy);
-        int x = fromX + stepx, y = fromY + stepy;
-        Piece captured = null;
-
-        while (x != toX && y != toY) {
-            Piece p = board.getPieceAt(x, y);
-            if (p == null) {
-                // leer -> weiter
-            } else if (p.getOwner() == currentPlayer) {
-                // Eigene Figur blockiert
-                return false;
-            } else {
-                // Gegnerische Figur
-                if (captured != null) return false; // schon eine gesehen -> ungültig
-                captured = p;
-            }
-            x += stepx; y += stepy;
-        }
-        // gültig nur, wenn genau eine gegnerische Figur übersprungen wurde
-        return captured != null;
-    }
-}
-
-    public boolean makeMove(int fromX, int fromY, int toX, int toY) {
-    Piece piece = board.getPieceAt(fromX, fromY);
-    if (piece == null) return false;
-
-    boolean isCapture = isValidCapture(fromX, fromY, toX, toY);
-    boolean isSimpleMove = !isCapture && isValidMove(fromX, fromY, toX, toY);
-
-    if (!isCapture && !isSimpleMove) {
-        if (mainView != null) mainView.showError("Ungültiger Zug!");
-        return false;
-    }
-
-    // ggf. geschlagene Figur entfernen
-    if (isCapture) {
         if (piece.getType() == Piece.PieceType.MAN) {
+            // Klassischer 2er-Sprung
+            if (Math.abs(dx) != 2 || Math.abs(dy) != 2) return false;
             int mx = (fromX + toX) / 2;
             int my = (fromY + toY) / 2;
-            Piece cap = board.getPieceAt(mx, my);
-            if (cap != null) { 
-                board.freeField(mx, my);
-                cap.getOwner().removePiece(cap);
-            }
+            Piece mid = board.getPieceAt(mx, my);
+            return mid != null && mid.getOwner() != currentPlayer;
         } else {
-            // Dame: finde die übersprungene gegnerische Figur entlang der Diagonale
-            int dx = Integer.signum(toX - fromX);
-            int dy = Integer.signum(toY - fromY);
-            int cx = fromX + dx, cy = fromY + dy;
-            while (cx != toX && cy != toY) {
-                Piece pth = board.getPieceAt(cx, cy);
-                if (pth != null && pth.getOwner() != currentPlayer) {
-                    board.freeField(cx, cy);
-                    pth.getOwner().removePiece(pth);
-                    break; // genau eine Figur muss entfernt werden
+            // Dame: "fliegender" Schlag – genau EINE gegnerische Figur auf dem Weg
+            int stepx = Integer.signum(dx);
+            int stepy = Integer.signum(dy);
+            int x = fromX + stepx, y = fromY + stepy;
+            Piece captured = null;
+
+            while (x != toX && y != toY) {
+                Piece p = board.getPieceAt(x, y);
+                if (p == null) {
+                    // leer -> weiter
+                } else if (p.getOwner() == currentPlayer) {
+                    // Eigene Figur blockiert
+                    return false;
+                } else {
+                    // Gegnerische Figur
+                    if (captured != null) return false; // schon eine gesehen -> ungültig
+                    captured = p;
                 }
-                cx += dx; cy += dy;
+                x += stepx; y += stepy;
+            }
+            // gültig nur, wenn genau eine gegnerische Figur übersprungen wurde
+            return captured != null;
+        }
+    }
+
+    public boolean makeMove(int fromX, int fromY, int toX, int toY) {
+        Piece piece = board.getPieceAt(fromX, fromY);
+        if (piece == null) return false;
+
+        boolean isCapture = isValidCapture(fromX, fromY, toX, toY);
+        boolean isSimpleMove = !isCapture && isValidMove(fromX, fromY, toX, toY);
+
+        if (!isCapture && !isSimpleMove) {
+            if (mainView != null) mainView.showError("Ungültiger Zug!");
+            return false;
+        }
+
+        // ggf. geschlagene Figur entfernen
+        if (isCapture) {
+            if (piece.getType() == Piece.PieceType.MAN) {
+                int mx = (fromX + toX) / 2;
+                int my = (fromY + toY) / 2;
+                Piece cap = board.getPieceAt(mx, my);
+                if (cap != null) { 
+                    board.freeField(mx, my);
+                    cap.getOwner().removePiece(cap);
+                }
+            } else {
+                // Dame: finde die übersprungene gegnerische Figur entlang der Diagonale
+                int dx = Integer.signum(toX - fromX);
+                int dy = Integer.signum(toY - fromY);
+                int cx = fromX + dx, cy = fromY + dy;
+                while (cx != toX && cy != toY) {
+                    Piece pth = board.getPieceAt(cx, cy);
+                    if (pth != null && pth.getOwner() != currentPlayer) {
+                        board.freeField(cx, cy);
+                        pth.getOwner().removePiece(pth);
+                        break; // genau eine Figur muss entfernt werden
+                    }
+                    cx += dx; cy += dy;
+                }
             }
         }
-    }
 
-    // Figur ziehen
-    board.freeField(fromX, fromY);
-    board.occupyField(toX, toY, piece);
-    piece.move(board, fromX, fromY, toX, toY);
+        // Figur ziehen
+        board.freeField(fromX, fromY);
+        board.occupyField(toX, toY, piece);
+        piece.move(board, fromX, fromY, toX, toY);
 
-    // Promotion bei normalem Stein
-    if (piece.getType() == Piece.PieceType.MAN) {
-        if ((piece.getColor() == Piece.PieceColor.WHITE && toX == 0) ||
-            (piece.getColor() == Piece.PieceColor.BLACK && toX == 7)) {
-            board.promotetoDame(toX, toY);
+        // Promotion bei normalem Stein
+        if (piece.getType() == Piece.PieceType.MAN) {
+            if ((piece.getColor() == Piece.PieceColor.WHITE && toX == 0) ||
+                (piece.getColor() == Piece.PieceColor.BLACK && toX == 7)) {
+                board.promotetoDame(toX, toY);
+            }
         }
-    }
 
-    // *** Entscheidende Änderung ***
-    // Nur wenn der aktuelle Zug ein Schlag war UND noch ein Schlag möglich ist,
-    // bleibt der Spieler dran (Mehrfachschlag). Nach einem normalen Zug IMMER Wechsel.
-    if (isCapture && canCaptureInAnyDirection(toX, toY)) {
-        // kein switchPlayer(); UI sollte weitere Schlagzüge mit derselben Figur erlauben/erzwingen
-    } else {
-        switchPlayer();
-    }
+        // *** Entscheidende Änderung ***
+        // Nur wenn der aktuelle Zug ein Schlag war UND noch ein Schlag möglich ist,
+        // bleibt der Spieler dran (Mehrfachschlag). Nach einem normalen Zug IMMER Wechsel.
+        if (isCapture && canCaptureInAnyDirection(toX, toY)) {
+            arePiecesLeft();
+            // Spieler bleibt am Zug
+        } else {
+            switchPlayer();
+            arePiecesLeft();
+        }
 
-    if (mainView != null) mainView.clearError();
-    return true;
-}
+        if (mainView != null) mainView.clearError();
+        return true;
+    }
 
 
     public void addBoardChangeListener(Runnable listener) {
@@ -232,6 +234,20 @@ public class GameController {
         currentPlayer = (currentPlayer == player1) ? player2 : player1;
         if (mainView != null) {
             mainView.setCurrentPlayerDisplay(currentPlayer.getName());
+        }
+    }
+
+    private void arePiecesLeft() {
+        if (player1.getPieceCount() == 0) {
+            player2.setHasWon(true);
+            if (mainView != null) {
+                mainView.showWinnerDialog(player2.getName());
+            }
+        } else if (player2.getPieceCount() == 0) {
+            player1.setHasWon(true);
+            if (mainView != null) {
+                mainView.showWinnerDialog(player1.getName());
+            }
         }
     }
 }

@@ -6,9 +6,7 @@ public class App {
         // und der Ansicht.
         GameController gameController = new GameController();
         javax.swing.SwingUtilities.invokeLater(() -> {
-
-            new MainView(null);
-            new StartFrame();  // Hier wird der Controller übergeben
+            new StartFrame();  // StartFrame anzeigen
         });
         
         // Das Spiel starten
