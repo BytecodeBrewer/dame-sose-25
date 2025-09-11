@@ -1,8 +1,8 @@
 import javax.swing.*;
 import java.awt.*;
 
-
 public class StartFrame extends JFrame {
+    private String mode = null; // "debug" oder null für normalen Modus
 
     public StartFrame() {
         setTitle("Dame Spiel - Start");
@@ -59,11 +59,12 @@ public class StartFrame extends JFrame {
 
     }
 
+    public String getMode() {
+        return mode; // Hier kannst du den Modus zurückgeben, falls benötigt
+    }
+
     public void display() {
         setVisible(true);
     }
 
-    public void close() {
-        dispose();
-    }
 }

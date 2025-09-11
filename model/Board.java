@@ -86,12 +86,14 @@ public class Board {
         Piece p = new Piece(Piece.PieceColor.WHITE, Piece.PieceType.MAN, player1, i, j);
         occupyField(i, j, p);
         player1.addPiece(p);
+        System.out.println("Weißer Stein bei (" + i + ", " + j + ") gesetzt.");
     }
 
     public void setBlackPiece(int i, int j) {
         Piece p = new Piece(Piece.PieceColor.BLACK, Piece.PieceType.MAN, player2, i, j);
         occupyField(i, j, p);
         player2.addPiece(p);
+        System.out.println("Weißer Stein bei (" + i + ", " + j + ") gesetzt.");
     }
 
     public boolean isFieldOccupiedByOpponent(int x, int y, Player player) {

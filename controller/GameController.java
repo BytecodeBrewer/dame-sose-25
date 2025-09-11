@@ -4,6 +4,8 @@ public class GameController {
     private Player player2;
     private Player currentPlayer;
     private MainView mainView;
+    private StartFrame mode;
+    private String convertMode = null;
 
     public GameController() {
         this.player1 = new Player("Player 1"); // Weiß
@@ -38,6 +40,10 @@ public class GameController {
 
     public void startDebugMode() {
         board.getClearBoard();
+        player1.getPieces().clear();           // <<< NEU: Spielerlisten leeren
+        player2.getPieces().clear();           // <<< NEU
+        player1.setHasWon(false);              // optional sauber halten
+        player2.setHasWon(false);              // optional
         currentPlayer = player1; // Weiß beginnt
     }
 
@@ -161,6 +167,7 @@ public class GameController {
     }
 
     public boolean makeMove(int fromX, int fromY, int toX, int toY) {
+        
         Piece piece = board.getPieceAt(fromX, fromY);
         if (piece == null) return false;
 
@@ -168,6 +175,7 @@ public class GameController {
         boolean isSimpleMove = !isCapture && isValidMove(fromX, fromY, toX, toY);
 
         if (!isCapture && !isSimpleMove) {
+            System.out.println("Ungültiger Zug von "+!isCapture+" ."+!isSimpleMove);
             if (mainView != null) mainView.showError("Ungültiger Zug!");
             return false;
         }
@@ -216,9 +224,11 @@ public class GameController {
         // Nur wenn der aktuelle Zug ein Schlag war UND noch ein Schlag möglich ist,
         // bleibt der Spieler dran (Mehrfachschlag). Nach einem normalen Zug IMMER Wechsel.
         if (isCapture && canCaptureInAnyDirection(toX, toY)) {
+            System.out.println("Mehrfachschlag möglich, Spieler bleibt am Zug.");
             arePiecesLeft();
             // Spieler bleibt am Zug
         } else {
+            System.out.println("Zug beendet, Spieler wechselt.");
             switchPlayer();
             arePiecesLeft();
         }
@@ -239,7 +249,13 @@ public class GameController {
     }
 
     public void resetGame() {
-        board.initialize();
+        convertMode = mode.getMode();
+
+        if ("debug".equals(convertMode)) {
+            board.getClearBoard();
+        } else {
+            board.initialize();
+        }
         currentPlayer = player1;
         // NEU: Aktualisiere Spieleranzeige nach Reset
         if (mainView != null) {
@@ -255,6 +271,9 @@ public class GameController {
     }
 
     private void arePiecesLeft() {
+        System.out.println("Prüfe, ob noch Steine übrig sind..." +
+                           " Spieler 1 hat " + player1.getPieceCount() + " Steine, " +
+                           " Spieler 2 hat " + player2.getPieceCount() + " Steine.");
         if (player1.getPieceCount() == 0) {
             player2.setHasWon(true);
             if (mainView != null) {

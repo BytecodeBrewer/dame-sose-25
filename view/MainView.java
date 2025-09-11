@@ -9,9 +9,6 @@ public class MainView {
     private JFrame frame;
     private BoardView boardView;           // <-- Feld
     private JPanel pieceSelectionPanel;
-    private JButton startButton;
-    private JButton setWhitePieceButton;
-    private JButton setBlackPieceButton;
 
     // NEU: Status & Fehler
     private JLabel currentPlayerLabel; // "Am Zug: ..."
@@ -23,12 +20,13 @@ public class MainView {
             this.gameController = new GameController();
             this.gameController.setMainView(this);  // NEU: View beim Controller registrieren
             initialize(mode);
+            gameController.startGame();
         } else {
             this.startFrame = startFrame;
             this.gameController = new GameController();
-            this.gameController.setDebugMode(null);  // NEU: View beim Controller registrieren
-            this.gameController.startDebugMode();
+            this.gameController.setDebugMode(this);  // NEU: View beim Controller registrieren
             initialize(mode);
+            gameController.startDebugMode();
         }
     }
 
@@ -118,6 +116,7 @@ public class MainView {
         frame.setSize(800, 600);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+        gameController.checkAndAnnounceWinnerNow();
         setCurrentPlayerDisplay(gameController.getCurrentPlayer().getName()); //Anzeige dafür wer Dran ist
 
     }
@@ -133,14 +132,13 @@ public class MainView {
         killButton(whiteBtn);
         killButton(blackBtn);
         killButton(startBtn);
-
+        
+        // 3) Panel mit den Buttons entfernen
         frame.remove(pieceSelectionPanel);
-
         frame.revalidate();
         frame.repaint();
 
         clearError();
-        setCurrentPlayerDisplay(gameController.getCurrentPlayer().getName());
     }
 
     private static void killButton(AbstractButton b) {
@@ -167,13 +165,12 @@ public class MainView {
         JDialog dlg = new JDialog(frame, "Spielende", true);
         dlg.setSize(300, 200);
 
-        frame = new JFrame("Dame");
-        showWinnerLabel = new JLabel("Gewonnen hat: " + winnerName);
-        showWinnerLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        showWinnerLabel = new JLabel("Gewonnen hat: " + winnerName, SwingConstants.CENTER);
 
+        
 
-        JPanel buttonPanel = new JPanel();
-        JButton resetButton = new JButton("Neues Spiel");
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton resetButton = new JButton("Neustart");
         JButton endButton = new JButton("Beenden");
         buttonPanel.add(resetButton);
         buttonPanel.add(endButton);

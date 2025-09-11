@@ -56,6 +56,10 @@ public class Player {
         return pieces.size();
     }
 
+    public void clearPieces() {
+        pieces.clear();
+    }
+
     public boolean hasNoPieces() {
         return pieces.isEmpty();
     }
