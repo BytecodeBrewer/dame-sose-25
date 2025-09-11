@@ -38,7 +38,7 @@ public class Board {
         }
     }
 
-    public void clearBoard() {
+    private void clearBoard() {
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
                 board[i][j] = null;
@@ -72,6 +72,10 @@ public class Board {
 
     public void initialize() {
         initializeBoard();
+    }
+
+    public void getClearBoard() {
+        clearBoard();
     }
 
     public boolean isFieldFree(int x, int y) {

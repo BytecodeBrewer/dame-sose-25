@@ -13,24 +13,25 @@ public class StartFrame extends JFrame {
 
         // Buttons
         JButton startButton = new JButton("Start Game");
-        JButton loadButton  = new JButton("Load Game");
+        JButton debugButton  = new JButton("Debug Mode");
         JButton endButton   = new JButton("End Game");
         startButton.setBackground(new Color(75,75,75));
         startButton.setForeground(Color.WHITE);
-        loadButton.setBackground(new Color(75,75,75));
-        loadButton.setForeground(Color.WHITE);
+        debugButton.setBackground(new Color(75,75,75));
+        debugButton.setForeground(Color.WHITE);
         endButton.setBackground(new Color(75,75,75));
         endButton.setForeground(Color.WHITE);
 
 
         // Button-Actions
         startButton.addActionListener(_ -> {
-            new MainView(this);
+            new MainView(this, null);
             setVisible(false);
         });
 
-        loadButton.addActionListener(_ -> {
-            JOptionPane.showMessageDialog(this, "Load Game not implemented yet!");
+        debugButton.addActionListener(_ -> {
+            new MainView(this, "debug");
+            setVisible(false);
         });
 
         endButton.addActionListener(_ -> System.exit(0));
@@ -39,7 +40,7 @@ public class StartFrame extends JFrame {
         JPanel panel = new JPanel(new GridLayout(3, 1, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         panel.add(startButton);
-        panel.add(loadButton);
+        panel.add(debugButton);
         panel.add(endButton);
 
         add(panel, BorderLayout.CENTER);

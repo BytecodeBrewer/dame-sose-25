@@ -10,12 +10,19 @@ public class MainView {
     private JLabel currentPlayerLabel; // "Am Zug: ..."
     private JLabel errorLabel;         // Platzhalter für Fehlermeldungen
     private JLabel showWinnerLabel; // Platzhalter für Gewinneranzeige
-
-    public MainView(StartFrame startFrame) {
-        this.startFrame = startFrame;
-        this.gameController = new GameController();
-        this.gameController.setMainView(this);  // NEU: View beim Controller registrieren
-        initialize();
+    public MainView(StartFrame startFrame, String mode) {
+        if(mode == null) {
+            this.startFrame = startFrame;
+            this.gameController = new GameController();
+            this.gameController.setMainView(this);  // NEU: View beim Controller registrieren
+            initialize();
+        } else {
+            this.startFrame = startFrame;
+            this.gameController = new GameController();
+            this.gameController.setDebugMode(null);  // NEU: View beim Controller registrieren
+            this.gameController.startDebugMode();
+            initialize();
+        }
     }
 
     private void initialize() {
@@ -65,11 +72,6 @@ public class MainView {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
         setCurrentPlayerDisplay(gameController.getCurrentPlayer().getName()); //Anzeige dafür wer Dran ist
-
-        // ---- OPTIONAL: Demo-Leuchtziele zum Testen (später Controller ruft boardView.setLegalTargets(...))
-        // java.util.List<java.awt.Point> demo = java.util.List.of(new java.awt.Point(2,3), new java.awt.Point(3,4));
-        // boardView.setLegalTargets(demo);
-        // setCurrentPlayerDisplay("Weiß");
     }
 
     // NEU: öffentliche Helfer, damit Controller/andere Klassen Text setzen können

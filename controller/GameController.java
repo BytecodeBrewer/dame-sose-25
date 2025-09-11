@@ -16,12 +16,21 @@ public class GameController {
         this.mainView = mainView;
     }
 
+    public void setDebugMode(MainView mainView) {
+        this.mainView = mainView;
+    }
+
     public Player getCurrentPlayer() {
         return currentPlayer;
     }
 
     public Board getBoard() {
         return board;
+    }
+
+    public void startDebugMode() {
+        board.getClearBoard();
+        currentPlayer = player1; // Weiß beginnt
     }
 
     public void startGame() {

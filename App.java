@@ -10,6 +10,7 @@ public class App {
         });
         
         // Das Spiel starten
+        gameController.startDebugMode();
         gameController.startGame();
 
     }
