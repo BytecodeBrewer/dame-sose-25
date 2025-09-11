@@ -40,7 +40,7 @@ public class MainView {
         JMenuItem resetItem = new JMenuItem("Reset Game");
         JMenuItem endItem   = new JMenuItem("End Game");
 
-        resetItem.addActionListener(_ -> {
+        resetItem.addActionListener(r -> {
             gameController.resetGame();
             // Option: Fehlermeldung zurücksetzen & Spieleranzeige ggf. aktualisieren
             clearError();
@@ -48,7 +48,7 @@ public class MainView {
             frame.repaint();
         });
 
-        endItem.addActionListener(_ -> {
+        endItem.addActionListener(e -> {
             frame.dispose();
             if (startFrame != null) {
                 startFrame.setVisible(true);
@@ -63,6 +63,7 @@ public class MainView {
         frame.setSize(800, 600);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+        setCurrentPlayerDisplay(gameController.getCurrentPlayer().getName()); //Anzeige dafür wer Dran ist
 
         // ---- OPTIONAL: Demo-Leuchtziele zum Testen (später Controller ruft boardView.setLegalTargets(...))
         // java.util.List<java.awt.Point> demo = java.util.List.of(new java.awt.Point(2,3), new java.awt.Point(3,4));
@@ -82,4 +83,24 @@ public class MainView {
     public void clearError() {
         if (errorLabel != null) errorLabel.setText(" ");
     }
+    
+    public void showWinnerDialog(String winnerName) {
+        GameOver dlg = new GameOver(
+            frame,
+            winnerName,
+            // onReset:
+            () -> {
+                gameController.resetGame();
+                clearError();
+                frame.repaint();
+            },
+            // onEnd:
+            () -> {
+                frame.dispose();
+                if (startFrame != null) startFrame.setVisible(true);
+            }
+        );
+        dlg.setVisible(true);
+    }
+    
 }
