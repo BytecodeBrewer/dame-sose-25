@@ -9,6 +9,13 @@ public class BoardView extends JPanel {
     private final GameController gameController;
     private int selectedRow = -1;
     private int selectedCol = -1;
+    // Spielauswahl (bleibt aktiv)
+    private MouseListener gameplayListener;
+    // Nur für Debug/Setup: Steine platzieren
+    private MouseListener placementListener;
+
+    // Sperre, damit nach Spielstart kein Platzieren mehr möglich ist
+    private boolean placementLocked = false;
 
     // NEU: vom Controller setzbare Ziel-Felder (leuchten)
     private List<Point> legalTargets = Collections.emptyList();
@@ -16,13 +23,18 @@ public class BoardView extends JPanel {
     public BoardView(GameController gameController) {
         this.gameController = gameController;
 
-        addMouseListener(new MouseAdapter() {
+        // Spiel-Listener einmalig anlegen und merken
+        this.gameplayListener = new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
                 int cellSize = Math.min(getWidth(), getHeight()) / 8;
                 int col = e.getX() / cellSize; // Spalte
                 int row = e.getY() / cellSize; // Zeile
-
+                // Klicken außerhalb des Brettes ignorieren
+                if (row < 0 || row >= 8 || col < 0 || col >= 8) {
+                    return;
+                }
+                // Kein Stein ausgewählt -> Auswahl setzen (wenn Stein da)
                 if (selectedRow == -1 && selectedCol == -1) {
                     Piece piece = gameController.getBoard().getPieceAt(row, col);
                     if (piece != null) {
@@ -60,7 +72,46 @@ public class BoardView extends JPanel {
                     }
                 }
             }
-        });
+        };
+        addMouseListener(this.gameplayListener);
+    }
+
+    public void setPlacingPieceColor(String color) {
+        if (placementLocked) return; // nach Spielstart ignorieren
+
+        // Vorherigen Platzier-Listener abklemmen (sonst stapelst du sie!)
+        detachPlacementListener();
+
+        // Neuen, farbspezifischen Platzier-Listener setzen
+        this.placementListener = new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                int cellSize = Math.min(getWidth(), getHeight()) / 8;
+                int c = e.getX() / cellSize;
+                int r = e.getY() / cellSize;
+
+                if ("WHITE".equals(color)) {
+                    gameController.setWhitePiece(r, c);
+                } else if ("BLACK".equals(color)) {
+                    gameController.setBlackPiece(r, c);
+                }
+                repaint();
+            }
+        };
+        addMouseListener(this.placementListener);
+    }
+
+    public void lockPlacement() {
+        this.placementLocked = true;
+        detachPlacementListener();
+        repaint();
+    }
+
+    private void detachPlacementListener() {
+        if (this.placementListener != null) {
+            removeMouseListener(this.placementListener);
+            this.placementListener = null;
+        }
     }
 
     // NEU: vom Controller/außen setzbar – welche Felder sollen leuchten?

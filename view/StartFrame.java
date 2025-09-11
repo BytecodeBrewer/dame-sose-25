@@ -63,11 +63,7 @@ public class StartFrame extends JFrame {
         setVisible(true);
     }
 
-    // Einstiegspunkt
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            StartFrame startFrame = new StartFrame();
-            startFrame.display();
-        });
+    public void close() {
+        dispose();
     }
 }

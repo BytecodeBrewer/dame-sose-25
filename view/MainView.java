@@ -1,10 +1,17 @@
 import javax.swing.*;
 import java.awt.*;
 
+
 public class MainView {
     private final GameController gameController;
     private final StartFrame startFrame;
+    private boolean gameStarted = false;
     private JFrame frame;
+    private BoardView boardView;           // <-- Feld
+    private JPanel pieceSelectionPanel;
+    private JButton startButton;
+    private JButton setWhitePieceButton;
+    private JButton setBlackPieceButton;
 
     // NEU: Status & Fehler
     private JLabel currentPlayerLabel; // "Am Zug: ..."
@@ -15,21 +22,22 @@ public class MainView {
             this.startFrame = startFrame;
             this.gameController = new GameController();
             this.gameController.setMainView(this);  // NEU: View beim Controller registrieren
-            initialize();
+            initialize(mode);
         } else {
             this.startFrame = startFrame;
             this.gameController = new GameController();
             this.gameController.setDebugMode(null);  // NEU: View beim Controller registrieren
             this.gameController.startDebugMode();
-            initialize();
+            initialize(mode);
         }
     }
 
-    private void initialize() {
+    private void initialize(String mode) {
+        
         frame = new JFrame("Dame");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        BoardView boardView = new BoardView(gameController);
+        boardView = new BoardView(gameController);
         frame.add(boardView, BorderLayout.CENTER);
 
         // --- NEU: Status-/Fehlerleiste unten
@@ -41,6 +49,45 @@ public class MainView {
         statusPanel.add(currentPlayerLabel, BorderLayout.WEST);
         statusPanel.add(errorLabel, BorderLayout.EAST);
         frame.add(statusPanel, BorderLayout.SOUTH);
+        if(mode != null) {
+            pieceSelectionPanel = new JPanel(new GridLayout(1, 2, 10, 0));
+            JButton startButton = new JButton("Start Game");
+            JButton setWhitePieceButton  = new JButton("White");
+            JButton setBlackPieceButton   = new JButton("Black");
+            startButton.setBackground(new Color(75,75,75));
+            startButton.setForeground(Color.WHITE);
+            setWhitePieceButton.setBackground(new Color(75,75,75));
+            setWhitePieceButton.setForeground(Color.WHITE);
+            setBlackPieceButton.setBackground(new Color(75,75,75));
+            setBlackPieceButton.setForeground(Color.WHITE);
+            pieceSelectionPanel.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
+            pieceSelectionPanel.add(setWhitePieceButton);
+            pieceSelectionPanel.add(setBlackPieceButton);
+            pieceSelectionPanel.add(startButton);
+            frame.add(pieceSelectionPanel, BorderLayout.NORTH);
+
+            setWhitePieceButton.addActionListener(_ -> {
+                if (gameStarted) return; // Guard
+                else { boardView.setPlacingPieceColor("WHITE");
+                setWhitePieceButton.setBackground(new Color(150,150,150));
+                setBlackPieceButton.setBackground(new Color(75,75,75));
+                clearError();
+                frame.repaint();
+                }
+                
+            });
+            setBlackPieceButton.addActionListener(_ -> {
+                if (gameStarted) return; // Guard
+                else {
+                boardView.setPlacingPieceColor("BLACK");
+                setBlackPieceButton.setBackground(new Color(150,150,150));
+                setWhitePieceButton.setBackground(new Color(75,75,75));
+                clearError();
+                frame.repaint();
+                }
+            });
+            startButton.addActionListener(_ -> onStartGame(setWhitePieceButton, setBlackPieceButton, startButton));
+        }
 
         JMenuBar menuBar = new JMenuBar();
         JMenu gameMenu = new JMenu("Game");
@@ -72,7 +119,36 @@ public class MainView {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
         setCurrentPlayerDisplay(gameController.getCurrentPlayer().getName()); //Anzeige dafür wer Dran ist
+
     }
+
+    private void onStartGame(JButton whiteBtn, JButton blackBtn, JButton startBtn) {
+        if (gameStarted) return;
+        gameStarted = true;
+
+        // 1) Platzieren auf dem Board endgültig sperren
+        boardView.lockPlacement();
+
+        // 2) Buttons zuverlässig abschalten
+        killButton(whiteBtn);
+        killButton(blackBtn);
+        killButton(startBtn);
+
+        frame.remove(pieceSelectionPanel);
+
+        frame.revalidate();
+        frame.repaint();
+
+        clearError();
+        setCurrentPlayerDisplay(gameController.getCurrentPlayer().getName());
+    }
+
+    private static void killButton(AbstractButton b) {
+        for (var al : b.getActionListeners()) b.removeActionListener(al);
+        b.setEnabled(false);
+        b.setFocusable(false);
+    }
+
 
     // NEU: öffentliche Helfer, damit Controller/andere Klassen Text setzen können
     public void setCurrentPlayerDisplay(String name) {

@@ -82,6 +82,18 @@ public class Board {
         return board[x][y] == null;
     }
 
+    public void setWhitePiece(int i, int j) {
+        Piece p = new Piece(Piece.PieceColor.WHITE, Piece.PieceType.MAN, player1, i, j);
+        occupyField(i, j, p);
+        player1.addPiece(p);
+    }
+
+    public void setBlackPiece(int i, int j) {
+        Piece p = new Piece(Piece.PieceColor.BLACK, Piece.PieceType.MAN, player2, i, j);
+        occupyField(i, j, p);
+        player2.addPiece(p);
+    }
+
     public boolean isFieldOccupiedByOpponent(int x, int y, Player player) {
         Piece piece = board[x][y];
         return piece != null && !piece.getOwner().equals(player);

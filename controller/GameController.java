@@ -28,6 +28,14 @@ public class GameController {
         return board;
     }
 
+    public void setWhitePiece(int i, int j) {
+        board.setWhitePiece(i, j);
+    }
+
+    public void setBlackPiece(int i, int j) {
+        board.setBlackPiece(i, j);
+    }
+
     public void startDebugMode() {
         board.getClearBoard();
         currentPlayer = player1; // Weiß beginnt
