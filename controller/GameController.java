@@ -171,7 +171,6 @@ public class GameController {
         boolean isSimpleMove = !isCapture && isValidMove(fromX, fromY, toX, toY);
 
         if (!isCapture && !isSimpleMove) {
-            System.out.println("Ungültiger Zug von "+!isCapture+" ."+!isSimpleMove);
             if (mainView != null) mainView.showError("Ungültiger Zug!");
             return false;
         }
@@ -216,15 +215,11 @@ public class GameController {
             }
         }
 
-        // *** Entscheidende Änderung ***
         // Nur wenn der aktuelle Zug ein Schlag war UND noch ein Schlag möglich ist,
         // bleibt der Spieler dran (Mehrfachschlag). Nach einem normalen Zug IMMER Wechsel.
         if (isCapture && canCaptureInAnyDirection(toX, toY)) {
-            System.out.println("Mehrfachschlag möglich, Spieler bleibt am Zug.");
             arePiecesLeft();
-            // Spieler bleibt am Zug
         } else {
-            System.out.println("Zug beendet, Spieler wechselt.");
             switchPlayer();
             arePiecesLeft();
         }
@@ -238,9 +233,9 @@ public class GameController {
         board.addChangeListener(listener);
     }
 
+    // Diese Methode kann verwendet werden, um auf Klicks auf dem Brett zu reagieren
+    // z.B. um eine Auswahl anzuzeigen oder einen Zug vorzubereiten
     public void onSquareClicked(int x, int y) {
-        // Diese Methode kann verwendet werden, um auf Klicks auf dem Brett zu reagieren
-        // z.B. um eine Auswahl anzuzeigen oder einen Zug vorzubereiten
         board.selectSquare(x, y);
     }
 
@@ -250,10 +245,9 @@ public class GameController {
         if ("debug".equals(convertMode)) {
             board.getClearBoard();
         } else {
-            //board.initialize();
+            board.initialize();
         }
         currentPlayer = player1;
-        // NEU: Aktualisiere Spieleranzeige nach Reset
         if (mainView != null) {
             mainView.setCurrentPlayerDisplay(currentPlayer.getName());
         }
@@ -267,9 +261,6 @@ public class GameController {
     }
 
     private void arePiecesLeft() {
-        System.out.println("Prüfe, ob noch Steine übrig sind..." +
-                           " Spieler 1 hat " + player1.getPieceCount() + " Steine, " +
-                           " Spieler 2 hat " + player2.getPieceCount() + " Steine.");
         if (player1.getPieceCount() == 0) {
             player2.setHasWon(true);
             if (mainView != null) {

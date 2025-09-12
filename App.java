@@ -1,11 +1,15 @@
 public class App {
     public static void main(String[] args) {        
-        // Controller für das Spiel erstellen
         // Es ist das Kernstück des MVC Musters
-        // Es steuert die Logik des Spiels und interagiert mit dem Modell
-        // und der Ansicht.
+        // Es wird der Controller instanziert, der die Logik des Spiels steuert
+        // und die Kommunikation zwischen Model (Board, Piece, Player) und View (MainView) übernimmt
+        // Der StartFrame wird in der Swing-Event-Dispatching-Thread gestartet
+        // Das Sartframe ist das erste Fenster, das der Benutzer sieht
+        // und von dem aus das eigentliche Spiel gestartet wird
+        // Es ermöglicht die Auswahl des Spielmodus (z.B. Normal oder Debug)
+        // und initialisiert den GameController und die MainView entsprechend
         javax.swing.SwingUtilities.invokeLater(() -> {
-            new StartFrame();  // StartFrame anzeigen
+            new StartFrame();
 
         });
 
