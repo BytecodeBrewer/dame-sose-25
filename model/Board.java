@@ -18,8 +18,6 @@ public class Board {
     // Neue Felder für Listener und Auswahl
     private List<Runnable> changeListeners = new ArrayList<>();
     private boolean[][] selectedSquares;
-    private int capturedWhitePiecesCount = 0;
-    private int capturedBlackPiecesCount = 0;
 
     // Error handling
     private ErrMes errmes = ErrMes.NONE;
@@ -81,14 +79,12 @@ public class Board {
         Piece p = new Piece(Piece.PieceColor.WHITE, Piece.PieceType.MAN, player1, i, j);
         occupyField(i, j, p);
         player1.addPiece(p);
-        System.out.println("Weißer Stein bei (" + i + ", " + j + ") gesetzt.");
     }
 
     public void setBlackPiece(int i, int j) {
         Piece p = new Piece(Piece.PieceColor.BLACK, Piece.PieceType.MAN, player2, i, j);
         occupyField(i, j, p);
         player2.addPiece(p);
-        System.out.println("Weißer Stein bei (" + i + ", " + j + ") gesetzt.");
     }
 
     public boolean isFieldOccupiedByOpponent(int x, int y, Player player) {
@@ -138,11 +134,6 @@ public class Board {
         freeField(fromX, fromY);
         piece.move(toX, toY);
         errmes = ErrMes.NONE;
-        // Promotion logic
-        if ((piece.getColor() == Piece.PieceColor.WHITE && toX == 0) ||
-                (piece.getColor() == Piece.PieceColor.BLACK && toX == SIZE - 1)) {
-            promotetoDame(toX, toY);
-        }
         return true;
     }
 
@@ -207,22 +198,6 @@ public class Board {
         for (Runnable listener : changeListeners) {
             listener.run();
         }
-    }
-
-    public int getCapturedWhitePiecesCount() {
-        return capturedWhitePiecesCount;
-    }
-
-    public int getCapturedBlackPiecesCount() {
-        return capturedBlackPiecesCount;
-    }
-
-    public void incrementCapturedWhitePieces() {
-        capturedWhitePiecesCount++;
-    }
-
-    public void incrementCapturedBlackPieces() {
-        capturedBlackPiecesCount++;
     }
 
     // Prüft, ob ein Feld ausgewählt ist

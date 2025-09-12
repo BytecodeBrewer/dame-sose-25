@@ -32,10 +32,16 @@ public class GameController {
 
     public void setWhitePiece(int i, int j) {
         board.setWhitePiece(i, j);
+        if ((i == 0)) {
+            board.promotetoDame(i, j);
+        }
     }
 
     public void setBlackPiece(int i, int j) {
         board.setBlackPiece(i, j);
+        if ((i == 7)) {
+            board.promotetoDame(i, j);
+        }
     }
 
     public void startDebugMode() {
@@ -122,6 +128,8 @@ public class GameController {
     private boolean isValidCapture(int fromX, int fromY, int toX, int toY) {
         Piece piece = board.getPieceAt(fromX, fromY);
         if (piece == null) return false;
+
+        if (piece.getOwner() != currentPlayer) return false;
 
         // Ziel muss frei sein und Diagonale bleiben
         if (!board.isFieldFree(toX, toY)) return false;
@@ -219,8 +227,10 @@ public class GameController {
         // bleibt der Spieler dran (Mehrfachschlag). Nach einem normalen Zug IMMER Wechsel.
         if (isCapture && canCaptureInAnyDirection(toX, toY)) {
             arePiecesLeft();
+            arePieceStuck();
         } else {
             switchPlayer();
+            arePieceStuck();
             arePiecesLeft();
         }
 
@@ -262,15 +272,153 @@ public class GameController {
 
     private void arePiecesLeft() {
         if (player1.getPieceCount() == 0) {
-            player2.setHasWon(true);
             if (mainView != null) {
                 mainView.showWinnerDialog(player2.getName());
             }
         } else if (player2.getPieceCount() == 0) {
-            player1.setHasWon(true);
             if (mainView != null) {
                 mainView.showWinnerDialog(player1.getName());
             }
+        }
+    }
+
+    private void arePieceStuck() {
+
+        if (!hasAnyValidMoves(player1)) {
+            if (mainView != null) {
+                mainView.showWinnerDialog(player2.getName());
+            }
+        } else if (!hasAnyValidMoves(player2)) {
+            if (mainView != null) {
+                mainView.showWinnerDialog(player1.getName());
+            }
+        }
+    }
+
+    private boolean hasAnyValidMoves(Player player) {
+        for (int x = 0; x < 8; x++) {
+            for (int y = 0; y < 8; y++) {
+                Piece piece = board.getPieceAt(x, y);
+                if (piece != null && piece.getOwner() == player) {
+                    // Prüfe alle möglichen Zielfelder
+                    if(isPieceStuck(piece, x, y)) {
+                        player.capturePiece(piece);
+                    }
+                }
+            }
+        }
+        System.out.println("Anzahl gefangener Steine von " + player.getName() + ": " + player.getCapturedPieces().size());
+        return player.getCapturedPieces().size() < player.getPieceCount();
+    }
+
+    private boolean isPieceStuck(Piece piece, int fromX, int fromY) {
+        // Prüfe ob der Zug gültig ist
+        // Prüfe, ob das Zielfeld frei ist oder außerhalb des Brettes liegt
+        if (stuckForMoving(piece, fromX, fromY)) {
+            if(stuckForCapturing(piece, fromX, fromY)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+    }
+
+    private boolean stuckForMoving(Piece piece, int fromX, int fromY) {
+        if (piece.getColor() == Piece.PieceColor.WHITE) {
+            if (piece.getType() == Piece.PieceType.MAN) {
+                int toX = fromX - 1;
+                int toY1 = fromY - 1;
+                int toY2 = fromY + 1;
+                if (board.outOfBounds(toX, toY1) || !board.isFieldFree(toX, toY1)){
+                    if (board.outOfBounds(toX, toY2) || !board.isFieldFree(toX, toY2)) return true;
+                    else return false;
+                }
+
+                
+            } else {
+                // Dame: move any number of squares diagonally, path must be clear
+                int[][] directions = {{1,1}, {1,-1}, {-1,1}, {-1,-1}};
+                for (int[] dir : directions) {
+                    int stepX = dir[0];
+                    int stepY = dir[1];
+                    int x = fromX + stepX;
+                    int y = fromY + stepY;
+                    while (!board.outOfBounds(x, y)) {
+                        if (board.isFieldFree(x, y)) {
+                            return false; // Found a valid move
+                        }
+                        x += stepX;
+                        y += stepY;
+                    }
+                }
+                return true; // No valid moves found in this direction
+            } 
+        }
+        else {
+            if (piece.getType() == Piece.PieceType.MAN) {
+                int toX = fromX + 1;
+                int toY1 = fromY - 1;
+                int toY2 = fromY + 1;
+                if (board.outOfBounds(toX, toY1) || !board.isFieldFree(toX, toY1)){
+                    if (board.outOfBounds(toX, toY2) || !board.isFieldFree(toX, toY2)) return true;
+                    else return false;
+                }
+                
+            } else {
+                // Dame: move any number of squares diagonally, path must be clear
+                int[][] directions = {{1,1}, {1,-1}, {-1,1}, {-1,-1}};
+                for (int[] dir : directions) {
+                    int stepX = dir[0];
+                    int stepY = dir[1];
+                    int x = fromX + stepX;
+                    int y = fromY + stepY;
+                    while (!board.outOfBounds(x, y)) {
+                        if (board.isFieldFree(x, y)) {
+                            return false; // Found a valid move
+                        }
+                        x += stepX;
+                        y += stepY;
+                    }
+                }
+                return true; // No valid moves found in this direction
+            }
+        }
+        return false;
+    }
+
+    private boolean stuckForCapturing(Piece piece, int fromX, int fromY) {
+        if(piece.getType() == Piece.PieceType.MAN) {
+            // Klassischer 2er-Sprung
+            int[][] directions = {{2,2}, {2,-2}, {-2,2}, {-2,-2}};
+
+            for (int[] dir : directions) {
+                int toX = fromX + dir[0];
+                int toY = fromY + dir[1];
+                if (board.outOfBounds(toX, toY)) {
+                    continue;
+                }
+                if (isValidCapture(fromX, fromY, toX, toY)) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            // Dame: "fliegender" Schlag – genau EINE gegnerische Figur auf dem Weg
+            int[][] directions = {{2,2}, {2,-2}, {-2,2}, {-2,-2}};
+            for (int[] dir : directions) {
+                int toX = fromX + dir[0];
+                int toY = fromY + dir[1];
+                if (board.outOfBounds(toX, toY)) {
+                    continue;
+                }
+                if (isValidCapture(fromX, fromY, toX, toY)) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }

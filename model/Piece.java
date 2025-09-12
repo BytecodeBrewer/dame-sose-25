@@ -52,7 +52,7 @@ public class Piece {
 
     public boolean canMove(Board board, int toX, int toY, int x, int y) {
         // Logik, um zu überprüfen, ob das Stück zu der angegebenen Position erlaubt ist
-        if (isDame()) {
+        if (!isMan()) {
             // Dame: move any number of squares diagonally, path must be clear
             if (board.isFieldFree(toX, toY) && !board.isFieldOccupiedByOpponent(toX, toY, owner)
                     && Math.abs(toX - x) == Math.abs(toY - y) && !mustCapture(board)) {
@@ -78,44 +78,6 @@ public class Piece {
         return false;
     }
 
-    public boolean canMoveAnywhere(Board board) {
-        // If the piece can capture, it must do so (mandatory capture)
-        if (mustCapture(board)) {
-            return true;
-        }
-        if (isDame()) {
-            // Dame (king) can move any number of squares diagonally
-            for (int dx = -1; dx <= 1; dx += 2) {
-                for (int dy = -1; dy <= 1; dy += 2) {
-                    int step = 1;
-                    while (true) {
-                        int newX = x + dx * step;
-                        int newY = y + dy * step;
-                        if (newX < 0 || newX > 7 || newY < 0 || newY > 7)
-                            break;
-                        if (canMove(board, newX, newY, x, y)) {
-                            return true;
-                        }
-                        step++;
-                    }
-                }
-            }
-        } else {
-            // Normal piece: only one step diagonally, direction depends on color
-            int dir = (color == PieceColor.WHITE) ? -1 : 1;
-            for (int dx = -1; dx <= 1; dx += 2) {
-                int newX = x + dx;
-                int newY = y + dir;
-                if (newX >= 0 && newX <= 7 && newY >= 0 && newY <= 7) {
-                    if (canMove(board, newX, newY, x, y)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
     public void move(Board board, int x, int y, int newX, int newY) {
         // Spiel-Logik für das Bewegen des Stücks
         if (canMove(board, newX, newY, x, y)) {
@@ -123,13 +85,6 @@ public class Piece {
             board.occupyField(newX, newY, this);
             x = newX;
             y = newY;
-            promoteToDame(y);
-        }
-    }
-
-    public void promoteToDame(int y) {
-        if (isAtPromotionRow(y)) {
-            this.type = PieceType.DAME;
         }
     }
 
@@ -138,8 +93,8 @@ public class Piece {
         return (color == PieceColor.WHITE && y == 0) || (color == PieceColor.BLACK && y == 7);
     }
 
-    public boolean isDame() {
-        return type == PieceType.DAME;
+    public boolean isMan() {
+        return type == PieceType.MAN;
     }
 
     public void uncapture() {
@@ -169,8 +124,8 @@ public class Piece {
     }
 
     public boolean mustCapture(Board board) {
-        // Implement logic to determine if the piece must capture
-        if (isDame()) {
+        // Checkt, ob dieser Stein einen Schlagzug machen muss
+        if (!isMan()) {
             // Logic for Dame pieces
             for (int dx = -1; dx <= 1; dx += 2) {
                 for (int dy = -1; dy <= 1; dy += 2) {

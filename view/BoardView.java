@@ -149,7 +149,7 @@ public class BoardView extends JPanel {
                     g.fillOval(j * tileSize + 10, i * tileSize + 10, tileSize - 20, tileSize - 20);
 
                     // Dame-Kennzeichnung (Krone ♕ oder "D")
-                    if (piece.isDame()) {
+                    if (!piece.isMan()) {
                         g.setFont(g.getFont().deriveFont(Font.BOLD, Math.max(14f, tileSize * 0.6f)));
                         g.setColor((piece.getColor() == Piece.PieceColor.BLACK) ? Color.WHITE : Color.BLACK);
                         String text = "\u2655"; // ♕  (alternativ: "D")
