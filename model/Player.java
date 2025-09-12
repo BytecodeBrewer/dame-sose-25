@@ -50,4 +50,9 @@ public class Player {
     public void clearPieces() {
         pieces.clear();
     }
+
+    public Piece.PieceColor getColor() {
+        
+        return pieces.isEmpty() ? null : pieces.get(0).getColor();
+    }
 }

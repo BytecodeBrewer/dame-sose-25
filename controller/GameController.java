@@ -1,3 +1,7 @@
+import java.awt.Point;
+import java.util.ArrayList;
+import java.util.List;
+
 public class GameController {
     private Board board;
     private Player player1;
@@ -6,12 +10,83 @@ public class GameController {
     private MainView mainView;
     private StartFrame mode;
     private String convertMode = null;
+    public enum Cell { EMPTY, WM, WK, BM, BK } // White/Black Man/King
+    public static class ViewState {
+        public final Cell[][] grid;
+        public final java.util.List<java.awt.Point> legalTargets;
+        public final java.awt.Point selected;
+        public final String currentPlayerName;
+        public final String errorMessage;
+        public ViewState(Cell[][] g, List<Point> t, Point s, String n, String err){
+            this.grid = g; this.legalTargets = t; this.selected = s;
+            this.currentPlayerName = n; this.errorMessage = err;
+        }
+    }
+    private java.util.List<Point> currentLegalTargets = new ArrayList<>();
+    private Point selectedCell = null;
+    private String lastError = "";
+
 
     public GameController() {
         this.player1 = new Player("Player 1"); // Weiß
         this.player2 = new Player("Player 2"); // Schwarz
         this.board = new Board(player1, player2);
         this.currentPlayer = player1; // Weiß beginnt
+    }
+
+    
+    // wenn du ViewState aufbaust:
+    public ViewState getViewState() {
+        return new ViewState(
+            buildGrid(),
+            currentLegalTargets,
+            selectedCell,
+            currentPlayer != null ? currentPlayer.getName() : "Unknown",
+            lastError
+        );
+    }
+
+    private Cell[][] buildGrid() {
+        Cell[][] grid = new Cell[8][8];
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                Piece p = board.getPieceAt(r, c);
+                grid[r][c] =
+                    (p == null) ? Cell.EMPTY :
+                    (p.getColor() == Piece.PieceColor.WHITE
+                        ? (p.isMan() ? Cell.WM : Cell.WK)
+                        : (p.isMan() ? Cell.BM : Cell.BK));
+            }
+        }
+        return grid;
+    }
+
+    public void onCellClick(int row, int col) {
+    // 1) Auswahl setzen
+    selectedCell = new Point(row, col);
+
+    // 2) Zugmöglichkeiten für dieses Feld berechnen
+    Piece piece = board.getPieceAt(row, col);
+    if (piece != null && piece.getColor() == currentPlayer.getColor()) {
+        currentLegalTargets = calculateLegalMovesFor(piece, row, col);
+        lastError = "";
+    } else {
+        currentLegalTargets.clear();
+        lastError = "Ungültige Auswahl.";
+    }
+
+    // (Optional: UI benachrichtigen oder repaint triggern)
+    }
+    private List<Point> calculateLegalMovesFor(Piece piece, int fromX, int fromY) {
+        List<Point> targets = new ArrayList<>();
+        for (int toX = 0; toX < 8; toX++) {
+            for (int toY = 0; toY < 8; toY++) {
+                if (board.isFieldFree(toX, toY) && piece.canMove(board, toX, toY, fromX, fromY)) {
+                    targets.add(new Point(toX, toY));
+                }
+            }
+        }
+        return targets;
     }
 
     public void setMainView(MainView mainView) {
@@ -24,10 +99,6 @@ public class GameController {
 
     public Player getCurrentPlayer() {
         return currentPlayer;
-    }
-
-    public Board getBoard() {
-        return board;
     }
 
     public void setWhitePiece(int i, int j) {
