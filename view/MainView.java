@@ -104,9 +104,6 @@ public class MainView {
 
         endItem.addActionListener(_ -> {
             frame.dispose();
-            if (startFrame != null) {
-                startFrame.setVisible(true);
-            }
         });
 
         gameMenu.add(resetItem);
@@ -184,9 +181,6 @@ public class MainView {
         endButton.addActionListener(_ -> {
             dlg.dispose();
             frame.dispose();
-            if (startFrame != null) {
-                startFrame.setVisible(true);
-            }
         });
 
         dlg.setLayout(new BorderLayout());
