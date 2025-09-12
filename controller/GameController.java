@@ -3,14 +3,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GameController {
-    private Board board;
+    private final Board board;
     private Player player1;
     private Player player2;
     private Player currentPlayer;
-    private MainView mainView;
-    private StartFrame mode;
+    private GamePresenter presenter;
     private String convertMode = null;
+    private Mode mode;
+    public enum Mode { NORMAL, DEBUG }
     public enum Cell { EMPTY, WM, WK, BM, BK } // White/Black Man/King
+
     public static class ViewState {
         public final Cell[][] grid;
         public final java.util.List<java.awt.Point> legalTargets;
@@ -27,10 +29,11 @@ public class GameController {
     private String lastError = "";
 
 
-    public GameController() {
+    public GameController(Mode mode) {
         this.player1 = new Player("Player 1"); // Weiß
         this.player2 = new Player("Player 2"); // Schwarz
         this.board = new Board(player1, player2);
+        this.mode = mode;
         this.currentPlayer = player1; // Weiß beginnt
     }
 
@@ -89,12 +92,36 @@ public class GameController {
         return targets;
     }
 
-    public void setMainView(MainView mainView) {
-        this.mainView = mainView;
+    public void setPresenter(GamePresenter presenter) {
+        this.presenter = presenter;
+        refresh(); // initial zeichnen lassen
     }
 
-    public void setDebugMode(MainView mainView) {
-        this.mainView = mainView;
+    private void refresh() {
+        if (presenter != null) presenter.render(getViewState());
+    }
+
+    public void startGame() {
+    if (mode == Mode.DEBUG) {
+        startDebugMode();
+    } else {
+        startNormalMode();
+    }
+}
+    private void startNormalMode() {
+        board.initialize();
+        currentPlayer = player1;
+        refresh();
+    }
+
+    private void startDebugMode() {
+        board.getClearBoard();
+        currentPlayer = player1;
+        refresh();
+    }
+
+    public Mode getMode() {
+        return mode;
     }
 
     public Player getCurrentPlayer() {
@@ -113,16 +140,6 @@ public class GameController {
         if ((i == 7)) {
             board.promotetoDame(i, j);
         }
-    }
-
-    public void startDebugMode() {
-        board.getClearBoard();
-        currentPlayer = player1;
-    }
-
-    public void startGame() {
-        board.initialize();
-        currentPlayer = player1;
     }
 
     // Prüft, ob der Zug gültig ist: das startfeld enthält eine Spielfigur des
@@ -250,7 +267,7 @@ public class GameController {
         boolean isSimpleMove = !isCapture && isValidMove(fromX, fromY, toX, toY);
 
         if (!isCapture && !isSimpleMove) {
-            if (mainView != null) mainView.showError("Ungültiger Zug!");
+            if (presenter != null) presenter.showError("Ungültiger Zug.");
             return false;
         }
 
@@ -305,7 +322,7 @@ public class GameController {
             switchPlayer();
         }
 
-        if (mainView != null) mainView.clearError();
+        if (presenter != null) presenter.render(getViewState());
         return true;
     }
 
@@ -321,35 +338,25 @@ public class GameController {
     }
 
     public void resetGame() {
-        convertMode = mode.getMode();
 
-        if ("debug".equals(convertMode)) {
-            board.getClearBoard();
-        } else {
-            board.initialize();
-        }
-        currentPlayer = player1;
-        if (mainView != null) {
-            mainView.setCurrentPlayerDisplay(currentPlayer.getName());
-        }
     }
 
     private void switchPlayer() {
         currentPlayer = (currentPlayer == player1) ? player2 : player1;
-        if (mainView != null) {
-            mainView.setCurrentPlayerDisplay(currentPlayer.getName());
+        if (presenter != null) {
+            presenter.render(getViewState());
         }
     }
 
     private void arePiecesLeft() {
         if (player1.getPieceCount() == 0) {
-            if (mainView != null) {
-                mainView.showWinnerDialog(player2.getName());
+            if (presenter != null) {
+                presenter.showWinnerDialog(player2.getName());
                 return;
             }
         } else if (player2.getPieceCount() == 0) {
-            if (mainView != null) {
-                mainView.showWinnerDialog(player1.getName());
+            if (presenter != null) {
+                presenter.showWinnerDialog(player1.getName());
                 return;
             }
         }
@@ -360,12 +367,12 @@ public class GameController {
             return; // Spiel ist schon vorbei
         }
         if (!hasAnyValidMoves(player1)) {
-            if (mainView != null) {
-                mainView.showWinnerDialog(player2.getName());
+            if (presenter != null) {
+                presenter.showWinnerDialog(player2.getName());
             }
         } else if (!hasAnyValidMoves(player2)) {
-            if (mainView != null) {
-                mainView.showWinnerDialog(player1.getName());
+            if (presenter != null) {
+                presenter.showWinnerDialog(player1.getName());
             }
         }
         player1.clearCapturedPieces();

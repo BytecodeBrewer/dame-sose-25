@@ -2,35 +2,25 @@ import javax.swing.*;
 import java.awt.*;
 
 
-public class MainView {
+public class MainView extends JPanel implements GamePresenter{
     private final GameController gameController;
-    private final StartFrame startFrame;
+    private BoardView boardView;
+    private JLabel currentPlayerLabel;   // "Am Zug: ..."
+    private JLabel errorLabel;
+    private JLabel showWinnerLabel; // Platzhalter für Gewinneranzeige
     private boolean gameStarted = false;
     private JFrame frame;
-    private BoardView boardView;           // <-- Feld
     private JPanel pieceSelectionPanel;
 
-    // NEU: Status & Fehler
-    private JLabel currentPlayerLabel; // "Am Zug: ..."
-    private JLabel errorLabel;         // Platzhalter für Fehlermeldungen
-    private JLabel showWinnerLabel; // Platzhalter für Gewinneranzeige
-    public MainView(StartFrame startFrame, String mode) {
-        if(mode == null) {
-            this.startFrame = startFrame;
-            this.gameController = new GameController();
-            this.gameController.setMainView(this);  // NEU: View beim Controller registrieren
-            initialize(mode);
-            gameController.startGame();
-        } else {
-            this.startFrame = startFrame;
-            this.gameController = new GameController();
-            this.gameController.setDebugMode(this);  // NEU: View beim Controller registrieren
-            initialize(mode);
-            gameController.startDebugMode();
-        }
+
+    public MainView(GameController gameController) {
+        this.gameController = gameController;
+        initialize();   // kein mode-Parameter mehr
+        this.gameController.setPresenter(this);
+        gameController.startGame();
     }
 
-    private void initialize(String mode) {
+    private void initialize() {
         
         frame = new JFrame("Dame");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -40,7 +30,8 @@ public class MainView {
 
         // --- NEU: Status-/Fehlerleiste unten
         JPanel statusPanel = new JPanel(new BorderLayout(10, 0));
-        currentPlayerLabel = new JLabel("Am Zug: " + gameController.getCurrentPlayer().getName());
+        var vs = gameController.getViewState();
+        currentPlayerLabel = new JLabel("Am Zug: " + vs.currentPlayerName);
         errorLabel = new JLabel(" "); // leerer Platzhalter
         errorLabel.setForeground(Color.RED);
         statusPanel.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
@@ -48,7 +39,7 @@ public class MainView {
         statusPanel.add(errorLabel, BorderLayout.EAST);
         frame.add(statusPanel, BorderLayout.SOUTH);
         
-        if(mode != null) {
+        if(gameController.getMode() == GameController.Mode.DEBUG) {
             pieceSelectionPanel = new JPanel(new GridLayout(1, 2, 10, 0));
             JButton startButton = new JButton("Start Game");
             JButton setWhitePieceButton  = new JButton("White");
@@ -150,33 +141,34 @@ public class MainView {
         if (currentPlayerLabel != null) currentPlayerLabel.setText("Am Zug: " + name);
     }
 
+    @Override
+    public void render(GameController.ViewState vs) {
+        currentPlayerLabel.setText("Am Zug: " + vs.currentPlayerName);
+        errorLabel.setText(vs.errorMessage == null ? "" : vs.errorMessage);
+        boardView.repaint();
+    }
+
+    @Override
     public void showError(String message) {
-        if (errorLabel != null) errorLabel.setText((message != null && !message.isEmpty()) ? message : " ");
+        errorLabel.setText(message == null ? "" : message);
+        // optional: JOptionPane.showMessageDialog(this, message, "Fehler", JOptionPane.ERROR_MESSAGE);
     }
 
     public void clearError() {
         if (errorLabel != null) errorLabel.setText(" ");
     }
     
-    public void showWinnerDialog(String winnerName) {
+    public void showWinnerDialog(String playerName) {
         JDialog dlg = new JDialog(frame, "Spielende", true);
         dlg.setSize(300, 200);
 
-        showWinnerLabel = new JLabel("Gewonnen hat: " + winnerName, SwingConstants.CENTER);
+        showWinnerLabel = new JLabel("Gewonnen hat: " + playerName, SwingConstants.CENTER);
 
         
 
         JPanel buttonPanel = new JPanel(new FlowLayout());
-        JButton resetButton = new JButton("Neustart");
-        JButton endButton = new JButton("Beenden");
-        buttonPanel.add(resetButton);
+        JButton endButton = new JButton("OK");
         buttonPanel.add(endButton);
-
-        resetButton.addActionListener(_ -> {
-            gameController.resetGame();
-            clearError();
-            dlg.dispose();
-        });
 
         endButton.addActionListener(_ -> {
             dlg.dispose();

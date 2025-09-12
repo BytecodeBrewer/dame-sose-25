@@ -39,12 +39,16 @@ public class StartFrame extends JFrame {
 
         // Button-Actions
         startButton.addActionListener(_ -> {
-            new MainView(this, null);
+            GameController controller = new GameController(GameController.Mode.NORMAL);
+            MainView main = new MainView(controller);
+            main.setVisible(true);
             setVisible(false);
         });
 
         debugButton.addActionListener(_ -> {
-            new MainView(this, "debug");
+            GameController controller = new GameController(GameController.Mode.DEBUG);
+            MainView main = new MainView(controller);
+            main.setVisible(true);
             setVisible(false);
         });
         endButton.addActionListener(_ -> System.exit(0));
