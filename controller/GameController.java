@@ -63,19 +63,55 @@ public class GameController {
     }
 
     public void onCellClick(int row, int col) {
+    // 1. Wenn noch nichts ausgewählt ist
+    if (selectedCell == null) {
+        Piece piece = board.getPieceAt(row, col);
 
-    selectedCell = new Point(row, col);
+        if (piece != null && piece.getColor() == currentPlayer.getColor()) {
+            // Figur auswählen
+            selectedCell = new Point(row, col);
+            lastError = "";
+        } else {
+            // Ungültige Auswahl
+            lastError = "Ungültige Auswahl.";
+            if (presenter != null) presenter.showError(lastError);
+        }
+        refresh();
+        return;
+    }
 
+    // 2. Wenn dieselbe Figur erneut angeklickt wird → abwählen
+    if (selectedCell.x == row && selectedCell.y == col) {
+        selectedCell = null;
+        lastError = "";
+        refresh();
+        return;
+    }
+
+    // 3. Wenn eine andere eigene Figur angeklickt wird → umwählen
     Piece piece = board.getPieceAt(row, col);
     if (piece != null && piece.getColor() == currentPlayer.getColor()) {
-        currentLegalTargets = calculateLegalMovesFor(piece, row, col);
+        selectedCell = new Point(row, col);
         lastError = "";
-    } else {
-        currentLegalTargets.clear();
-        lastError = "Ungültige Auswahl.";
+        refresh();
+        return;
     }
 
+    // 4. Klick auf ein anderes Feld = Zugversuch
+    boolean success = makeMove(selectedCell.x, selectedCell.y, row, col);
+
+    if (!success) {
+        lastError = "Ungültiger Zug.";
+        if (presenter != null) presenter.showError(lastError);
+    } else {
+        lastError = "";
+        selectedCell = null; // Auswahl nach Zug löschen
     }
+
+    refresh();
+}
+
+
     private List<Point> calculateLegalMovesFor(Piece piece, int fromX, int fromY) {
         List<Point> targets = new ArrayList<>();
         for (int toX = 0; toX < 8; toX++) {
@@ -317,21 +353,6 @@ public class GameController {
 
         if (presenter != null) presenter.render(getViewState());
         return true;
-    }
-
-
-    public void addBoardChangeListener(Runnable listener) {
-        board.addChangeListener(listener);
-    }
-
-    // Diese Methode kann verwendet werden, um auf Klicks auf dem Brett zu reagieren
-    // z.B. um eine Auswahl anzuzeigen oder einen Zug vorzubereiten
-    public void onSquareClicked(int x, int y) {
-        board.selectSquare(x, y);
-    }
-
-    public void resetGame() {
-
     }
 
     private void switchPlayer() {

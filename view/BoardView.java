@@ -5,12 +5,8 @@ import java.awt.event.*;
 
 public class BoardView extends JPanel {
     private final GameController gameController;
-    private int selectedRow = -1;
-    private int selectedCol = -1;;
-
     // Nur für Debug/Setup: Steine platzieren
     private MouseListener placementListener;
-
     // Sperre, damit nach Spielstart kein Platzieren mehr möglich ist
     private boolean placementLocked = false;
     
@@ -26,28 +22,9 @@ public class BoardView extends JPanel {
             
                 if (row < 0 || row >= 8 || col < 0 || col >= 8) return;
 
-                if (selectedRow == -1) {
-                // Erste Klick: Nur selektieren, wenn dort eine Figur ist
-                GameController.ViewState vs = gameController.getViewState();
-                GameController.Cell cell = vs.grid[row][col];
-                if (cell != GameController.Cell.EMPTY) {
-                    selectedRow = row;
-                    selectedCol = col;
-                    repaint();
-                }
-                } else {
-                // Zweiter Klick: Zug versuchen
-                boolean moved = gameController.makeMove(selectedRow, selectedCol, row, col);
-
-                // Auswahl immer zurücksetzen (optisch klar)
-                selectedRow = -1;
-                selectedCol = -1;
-
-                // Egal ob true/false: neu zeichnen (bei false zeigt MainView ggf. Fehler)
-                repaint();
+                gameController.onCellClick(row, col);
                 }
                 
-            }
         });
     }
 
@@ -127,12 +104,12 @@ public class BoardView extends JPanel {
         }
 
         // 2) Optional: Roter Rand ÜBER allem (damit klar sichtbar)
-        if (selectedRow >= 0 && selectedCol >= 0) {
+        if (vs.selected != null) {
             g.setColor(new Color(255, 255, 0, 80));
-            g.fillRect(selectedCol * tileSize, selectedRow * tileSize, tileSize, tileSize);
+            g.fillRect(vs.selected.y * tileSize, vs.selected.x * tileSize, tileSize, tileSize);
 
             g.setColor(Color.RED);
-            g.drawRect(selectedCol * tileSize, selectedRow * tileSize, tileSize - 1, tileSize - 1);
+            g.drawRect(vs.selected.y * tileSize, vs.selected.x * tileSize, tileSize - 1, tileSize - 1);
         }
     }
 }
