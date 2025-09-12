@@ -2,11 +2,10 @@ import javax.swing.*;
 import java.awt.*;
 
 public class StartFrame extends JFrame {
-    private String mode = null; // "debug" oder null für normalen Modus
 
     public StartFrame() {
-        JFrame frame = new JFrame("Dame Spiel - Start");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setTitle("Dame Spiel - Start");
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Panel für Buttons
         JPanel panel = new JPanel();
@@ -53,33 +52,12 @@ public class StartFrame extends JFrame {
         });
         endButton.addActionListener(_ -> System.exit(0));
 
-        frame.add(panel);
-        frame.setSize(800, 600);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-        frame.setResizable(false);
+        this.add(panel);
+        this.setSize(800, 600);
+        this.setLocationRelativeTo(null);
+        this.setVisible(true);
+        this.setResizable(false);
 
-    }
-
-    // Wenn du das später mal brauchst, kannst du so das Menü starten:
-    public void initialize() {
-        // Setup für StartFrame, falls du noch extra Logik einfügen willst
-        setVisible(true);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setResizable(false);
-        setTitle("Dame Spiel - Start");
-        setSize(800, 600);
-        setLayout(new BorderLayout());
-
-    }
-
-    public String getMode() {
-        return mode; // Hier kannst du den Modus zurückgeben, falls benötigt
-    }
-
-    public void display() {
-        setVisible(true);
     }
 
 }

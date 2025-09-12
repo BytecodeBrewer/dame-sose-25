@@ -6,20 +6,18 @@ import java.awt.event.*;
 public class BoardView extends JPanel {
     private final GameController gameController;
     private int selectedRow = -1;
-    private int selectedCol = -1;
-    // Spielauswahl (bleibt aktiv)
-    private MouseListener gameplayListener;
+    private int selectedCol = -1;;
+
     // Nur für Debug/Setup: Steine platzieren
     private MouseListener placementListener;
 
     // Sperre, damit nach Spielstart kein Platzieren mehr möglich ist
     private boolean placementLocked = false;
+    
 
     public BoardView(GameController gameController) {
         this.gameController = gameController;
-
-        // Spiel-Listener einmalig anlegen und merken
-        this.gameplayListener = new MouseAdapter() {
+        addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
                 int cellSize = Math.min(getWidth(), getHeight()) / 8;
@@ -50,8 +48,7 @@ public class BoardView extends JPanel {
                 }
                 
             }
-        };
-        addMouseListener(this.gameplayListener);
+        });
     }
 
     public void setPlacingPieceColor(String color) {
@@ -67,7 +64,6 @@ public class BoardView extends JPanel {
                 int cellSize = Math.min(getWidth(), getHeight()) / 8;
                 int c = e.getX() / cellSize;
                 int r = e.getY() / cellSize;
-
                 if ("WHITE".equals(color)) {
                     gameController.setWhitePiece(r, c);
                 } else if ("BLACK".equals(color)) {
