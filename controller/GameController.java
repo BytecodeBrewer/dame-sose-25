@@ -229,9 +229,9 @@ public class GameController {
             arePiecesLeft();
             arePieceStuck();
         } else {
-            switchPlayer();
-            arePieceStuck();
             arePiecesLeft();
+            arePieceStuck();
+            switchPlayer();
         }
 
         if (mainView != null) mainView.clearError();
@@ -274,16 +274,20 @@ public class GameController {
         if (player1.getPieceCount() == 0) {
             if (mainView != null) {
                 mainView.showWinnerDialog(player2.getName());
+                return;
             }
         } else if (player2.getPieceCount() == 0) {
             if (mainView != null) {
                 mainView.showWinnerDialog(player1.getName());
+                return;
             }
         }
     }
 
     private void arePieceStuck() {
-
+        if (player1.getPieceCount() == 0 || player2.getPieceCount() == 0) {
+            return; // Spiel ist schon vorbei
+        }
         if (!hasAnyValidMoves(player1)) {
             if (mainView != null) {
                 mainView.showWinnerDialog(player2.getName());
@@ -293,6 +297,8 @@ public class GameController {
                 mainView.showWinnerDialog(player1.getName());
             }
         }
+        player1.clearCapturedPieces();
+        player2.clearCapturedPieces();
     }
 
     private boolean hasAnyValidMoves(Player player) {
@@ -307,7 +313,7 @@ public class GameController {
                 }
             }
         }
-        System.out.println("Anzahl gefangener Steine von " + player.getName() + ": " + player.getCapturedPieces().size());
+        System.out.println("Anzahl gefangene Steine von " + player.getName() + ": " + player.getCapturedPieces().size());
         return player.getCapturedPieces().size() < player.getPieceCount();
     }
 
@@ -333,27 +339,42 @@ public class GameController {
                 int toY1 = fromY - 1;
                 int toY2 = fromY + 1;
                 if (board.outOfBounds(toX, toY1) || !board.isFieldFree(toX, toY1)){
-                    if (board.outOfBounds(toX, toY2) || !board.isFieldFree(toX, toY2)) return true;
+                    if (board.outOfBounds(toX, toY2) || !board.isFieldFree(toX, toY2)) {
+                        System.out.println("Stein bei (" + fromX + "," + fromY + ") kann sich nicht bewegen. 1");
+                        return true;
+                    }
                     else return false;
                 }
 
                 
             } else {
                 // Dame: move any number of squares diagonally, path must be clear
-                int[][] directions = {{1,1}, {1,-1}, {-1,1}, {-1,-1}};
-                for (int[] dir : directions) {
-                    int stepX = dir[0];
-                    int stepY = dir[1];
-                    int x = fromX + stepX;
-                    int y = fromY + stepY;
-                    while (!board.outOfBounds(x, y)) {
-                        if (board.isFieldFree(x, y)) {
-                            return false; // Found a valid move
+                    int x = fromX;
+                    int y = fromY;
+                    for (int step = 1; step < 8; step++) {
+                        // Check all four diagonal directions
+                        int[][] directions = {{step, step}, {step, -step}, {-step, step}, {-step, -step}};
+                        for (int[] dir : directions) {
+                            int toX = x + dir[0];
+                            int toY = y + dir[1];
+                            if (board.outOfBounds(toX, toY)) {
+                                continue;
+                            }
+                            if (!board.isFieldFree(toX, toY) && !board.isFieldOccupiedByOpponent(toX, toY, piece.getOwner())) {
+                                System.out.println("Stein bei (" + fromX + "," + fromY + ") kann sich nicht bewegen. 11");
+                                continue; // Blocked by own piece
+                            }
+                            if (!board.isFieldFree(toX, toY) && board.isFieldOccupiedByOpponent(toX, toY, piece.getOwner())) {
+                                System.out.println("Stein bei (" + fromX + "," + fromY + ") kann sich nicht bewegen. 2");
+                                continue; // Blocked by opponent's piece
+                            }
+                            // Valid move found
+                            if (piece.canMove(board, toX, toY, fromX, fromY)) {
+                                System.out.println("Stein bei (" + fromX + "," + fromY + ") kann sich bewegen.");
+                                return false; // Found a valid move
+                            }
                         }
-                        x += stepX;
-                        y += stepY;
                     }
-                }
                 return true; // No valid moves found in this direction
             } 
         }
@@ -369,20 +390,32 @@ public class GameController {
                 
             } else {
                 // Dame: move any number of squares diagonally, path must be clear
-                int[][] directions = {{1,1}, {1,-1}, {-1,1}, {-1,-1}};
-                for (int[] dir : directions) {
-                    int stepX = dir[0];
-                    int stepY = dir[1];
-                    int x = fromX + stepX;
-                    int y = fromY + stepY;
-                    while (!board.outOfBounds(x, y)) {
-                        if (board.isFieldFree(x, y)) {
-                            return false; // Found a valid move
+                    int x = fromX;
+                    int y = fromY;
+                    for (int step = 1; step < 8; step++) {
+                        // Check all four diagonal directions
+                        int[][] directions = {{step, step}, {step, -step}, {-step, step}, {-step, -step}};
+                        for (int[] dir : directions) {
+                            int toX = x + dir[0];
+                            int toY = y + dir[1];
+                            if (board.outOfBounds(toX, toY)) {
+                                continue;
+                            }
+                            if (!board.isFieldFree(toX, toY) && !board.isFieldOccupiedByOpponent(toX, toY, piece.getOwner())) {
+                                System.out.println("Stein bei (" + fromX + "," + fromY + ") kann sich nicht bewegen. 11");
+                                continue; // Blocked by own piece
+                            }
+                            if (!board.isFieldFree(toX, toY) && board.isFieldOccupiedByOpponent(toX, toY, piece.getOwner())) {
+                                System.out.println("Stein bei (" + fromX + "," + fromY + ") kann sich nicht bewegen. 2");
+                                continue; // Blocked by opponent's piece
+                            }
+                            // Valid move found
+                            if (piece.canMove(board, toX, toY, fromX, fromY)) {
+                                System.out.println("Stein bei (" + fromX + "," + fromY + ") kann sich bewegen.");
+                                return false; // Found a valid move
+                            }
                         }
-                        x += stepX;
-                        y += stepY;
                     }
-                }
                 return true; // No valid moves found in this direction
             }
         }
@@ -412,9 +445,11 @@ public class GameController {
                 int toX = fromX + dir[0];
                 int toY = fromY + dir[1];
                 if (board.outOfBounds(toX, toY)) {
+                    System.out.println("out of bounds: (" + toX + "," + toY + ")");
                     continue;
                 }
                 if (isValidCapture(fromX, fromY, toX, toY)) {
+                    System.out.println("Stein bei (" + fromX + "," + fromY + ") kann schlagen.");
                     return false;
                 }
             }

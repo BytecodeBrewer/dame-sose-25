@@ -27,6 +27,10 @@ public class Player {
         capturedPieces.add(piece);
     }
 
+    public void clearCapturedPieces() {
+        capturedPieces.clear();
+    }
+
     public void addPiece(Piece piece) {
         pieces.add(piece);
     }

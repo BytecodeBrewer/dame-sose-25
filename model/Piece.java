@@ -63,9 +63,11 @@ public class Piece {
                     int checkX = x + dx * i;
                     int checkY = y + dy * i;
                     if (!board.isFieldFree(checkX, checkY)) {
+                        System.out.println("Pfad blockiert bei (" + checkX + "," + checkY + ")");
                         return false;
                     }
                 }
+                System.out.println("Dame kann sich bewegen.");
                 return true;
             }
         } else {
