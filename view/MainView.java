@@ -44,7 +44,7 @@ public class MainView extends JPanel implements GamePresenter{
         JMenuBar menuBar = new JMenuBar();
         JMenu gameMenu = new JMenu("Game");
         JMenuItem endItem   = new JMenuItem("Runde beenden");
-        endItem.addActionListener(_ -> {
+        endItem.addActionListener(e -> {
             frame.dispose();
             SwingUtilities.invokeLater(() -> new StartFrame());
         });
@@ -75,7 +75,7 @@ public class MainView extends JPanel implements GamePresenter{
         pieceSelectionPanel.add(startButton);
         frame.add(pieceSelectionPanel, BorderLayout.NORTH);
 
-        setWhitePieceButton.addActionListener(_ -> {
+        setWhitePieceButton.addActionListener(sw -> {
             boardView.setPlacingPieceColor("WHITE");
             setWhitePieceButton.setBackground(new Color(150,150,150));
             setBlackPieceButton.setBackground(new Color(75,75,75));
@@ -83,14 +83,14 @@ public class MainView extends JPanel implements GamePresenter{
             frame.repaint();    
         });
             
-        setBlackPieceButton.addActionListener(_ -> {
+        setBlackPieceButton.addActionListener(sb -> {
             boardView.setPlacingPieceColor("BLACK");
             setBlackPieceButton.setBackground(new Color(150,150,150));
             setWhitePieceButton.setBackground(new Color(75,75,75));
             clearError();
             frame.repaint();
         });
-        startButton.addActionListener(_ -> onStartGame(setWhitePieceButton, setBlackPieceButton, startButton));
+        startButton.addActionListener(s -> onStartGame(setWhitePieceButton, setBlackPieceButton, startButton));
     }
 
     private void onStartGame(JButton whiteBtn, JButton blackBtn, JButton startBtn) {
@@ -146,7 +146,7 @@ public class MainView extends JPanel implements GamePresenter{
         JButton endButton = new JButton("OK");
         buttonPanel.add(endButton);
 
-        endButton.addActionListener(_ -> {
+        endButton.addActionListener(e -> {
             dlg.dispose();
             frame.dispose();
             SwingUtilities.invokeLater(() -> new StartFrame());
