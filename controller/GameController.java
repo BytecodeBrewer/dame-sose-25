@@ -2,18 +2,26 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/*
+GameController managt den Spielablauf, Spielerwechsel, Zugvalidierung und Spielstatus.
+Es kommuniziert mit dem Board für Spiellogik und dem GamePresenter für UI-Updates.
+Zurzeit ist der Gamecontroller sehr umfangreich. In zukünftigen Versionen könnte die Logik
+weiter aufgeteilt werden, z.B. in separate Klassen für Zugvalidierung, Spielstatus und Spielregeln.
+*/ 
 public class GameController {
     private final Board board;
     private Player player1;
     private Player player2;
     private Player currentPlayer;
     private GamePresenter presenter;
-    private String convertMode = null;
     private Mode mode;
     public enum Mode { NORMAL, DEBUG }
     public enum Cell { EMPTY, WM, WK, BM, BK } // White/Black Man/King
+    private java.util.List<Point> currentLegalTargets = new ArrayList<>();
+    private Point selectedCell = null;
+    private String lastError = "";
 
+    // ViewState kapselt den aktuellen Zustand des Spiels für die UI
     public static class ViewState {
         public final Cell[][] grid;
         public final java.util.List<java.awt.Point> legalTargets;
@@ -25,11 +33,9 @@ public class GameController {
             this.currentPlayerName = n; this.errorMessage = err;
         }
     }
-    private java.util.List<Point> currentLegalTargets = new ArrayList<>();
-    private Point selectedCell = null;
-    private String lastError = "";
 
 
+    // Konstruktor initialisiert Spieler, Brett und Spielmodus
     public GameController(Mode mode) {
         this.player1 = new Player("Player 1");
         this.player2 = new Player("Player 2");
@@ -38,6 +44,9 @@ public class GameController {
         this.currentPlayer = player1;
     }
 
+    // Generiert den aktuellen ViewState für die UI
+    // Dies umfasst das Brett, legale Züge, ausgewählte Figur und Fehlermeldungen
+    // Es ermöglicht dem Presenter, den UI-Zustand basierend auf der Spiellogik zu rendern
     public ViewState getViewState() {
         return new ViewState(
             buildGrid(),
@@ -48,166 +57,230 @@ public class GameController {
         );
     }
 
+    // Baut das 8x8 Spielfeld-Array für die UI, um die Figuren darzustellen, basierend auf dem Board-Zustand
+    // Jede Zelle wird in einen Cell-Enum-Wert umgewandelt, der den Figurentyp und die Farbe repräsentiert
+    // Leere Felder werden als EMPTY dargestellt
     private Cell[][] buildGrid() {
         Cell[][] grid = new Cell[8][8];
-        for (int r = 0; r < 8; r++) {
-            for (int c = 0; c < 8; c++) {
-                Piece p = board.getPieceAt(r, c);
-                grid[r][c] =
-                    (p == null) ? Cell.EMPTY :
-                    (p.getColor() == Piece.PieceColor.WHITE
-                        ? (p.isMan() ? Cell.WM : Cell.WK)
-                        : (p.isMan() ? Cell.BM : Cell.BK));
+        for (int row = 0; row < 8; row++) {
+            for (int column = 0; column < 8; column++) {
+                Piece p = board.getPieceAt(row, column);
+                grid[row][column] = mapPieceToCell(p);
             }
         }
         return grid;
     }
 
-    public void onCellClick(int row, int col) {
-    // 1. Wenn noch nichts ausgewählt ist
-    if (selectedCell == null) {
-        Piece piece = board.getPieceAt(row, col);
+    // Hilfsmethode, die eine Piece-Instanz in den entsprechenden Cell-Enum-Wert umwandelt
+    private Cell mapPieceToCell(Piece p) {
+        // Wenn kein Stein vorhanden ist, gib EMPTY zurück
+        if (p == null) return Cell.EMPTY;
+        boolean isWhite = (p.getColor() == Piece.PieceColor.WHITE);
+        boolean isMan = p.isMan();
+        
+        // Rückgabe des entsprechenden Cell-Werts basierend auf Farbe und Typ
+        if (isWhite) {
+            return isMan ? Cell.WM : Cell.WK;
+        } else {
+            return isMan ? Cell.BM : Cell.BK;
+        }
+    }
 
+    // Handhabt Klicks auf das Spielfeld
+    public void onCellClick(int row, int column) {
+    // Wenn keine Zelle ausgewählt ist, überprüfe ob eine Auswahl möglich ist
+    if (handleInitialSelection(row, column)) return;
+    // Wenn bereits eine Zelle ausgewählt ist, überprüfe ob es ein Deselektieren möglich ist
+    if (handleDeselect(row, column)) return;
+    // Wenn eine Zelle ausgewählt ist, überprüfe ob es ein Reselect möglich ist
+    if (handleReselect(row, column)) return;
+    // Nachdem eine Zelle ausgewählt wurde, versuche den Zug auszuführen
+    handleMoveAttempt(row, column);
+    // Aktualisiere die UI nach jedem Zug
+    refresh();
+    }
+
+    // Handhabt die anfängliche Auswahl einer Zelle
+    private boolean handleInitialSelection(int row, int col) {
+        // Nur wenn noch keine Zelle ausgewählt ist
+        if (selectedCell != null) return false;
+
+        Piece piece = board.getPieceAt(row, col);
+        // Nur Auswahl erlauben, wenn eine Figur des aktuellen Spielers vorhanden ist
         if (piece != null && piece.getColor() == currentPlayer.getColor()) {
-            // Figur auswählen
             selectedCell = new Point(row, col);
             lastError = "";
         } else {
-            // Ungültige Auswahl
             lastError = "Ungültige Auswahl.";
             if (presenter != null) presenter.showError(lastError);
         }
         refresh();
-        return;
+        // Auswahl erfolgreich
+        return true;
     }
 
-    // 2. Wenn dieselbe Figur erneut angeklickt wird → abwählen
-    if (selectedCell.x == row && selectedCell.y == col) {
+    // Handhabt das Deselektieren der aktuell ausgewählten Zelle
+    private boolean handleDeselect(int row, int col) {
+        // Wenn keine Zelle ausgewählt ist, nichts zu tun
+        if (selectedCell == null) return false;
+        // Wenn die angeklickte Zelle nicht die ausgewählte ist, nichts zu tun
+        if (selectedCell.x != row || selectedCell.y != col) return false;
+
         selectedCell = null;
         lastError = "";
         refresh();
-        return;
+        // Deselektieren erfolgreich
+        return true;
     }
 
-    // 3. Wenn eine andere eigene Figur angeklickt wird → umwählen
-    Piece piece = board.getPieceAt(row, col);
-    if (piece != null && piece.getColor() == currentPlayer.getColor()) {
+    // Handhabt das Reselecten einer anderen Zelle mit einer eigenen Figur
+    private boolean handleReselect(int row, int col) {
+        // Wenn keine Zelle ausgewählt ist, nichts zu tun
+        if (selectedCell == null) return false;
+
+        Piece piece = board.getPieceAt(row, col);
+        // Wenn die angeklickte Zelle dem aktuellen Spieler nicht gehört, nichts zu tun
+        if (piece == null || piece.getColor() != currentPlayer.getColor()) return false;
+
         selectedCell = new Point(row, col);
         lastError = "";
         refresh();
-        return;
+        // Reselect erfolgreich
+        return true;
     }
 
-    // 4. Klick auf ein anderes Feld = Zugversuch
-    boolean success = makeMove(selectedCell.x, selectedCell.y, row, col);
+    // Handhabt den Versuch, einen Zug von der ausgewählten Zelle zur angeklickten Zelle auszuführen
+    private void handleMoveAttempt(int row, int col) {
+        // Prüft, ob der Zug gültig ist und speichert das Ergebnis
+        boolean success = makeMove(selectedCell.x, selectedCell.y, row, col);
 
-    if (!success) {
-        lastError = "Ungültiger Zug.";
-        if (presenter != null) presenter.showError(lastError);
-    } else {
-        lastError = "";
-        selectedCell = null; // Auswahl nach Zug löschen
-    }
-
-    refresh();
-}
-
-
-    private List<Point> calculateLegalMovesFor(Piece piece, int fromX, int fromY) {
-        List<Point> targets = new ArrayList<>();
-        for (int toX = 0; toX < 8; toX++) {
-            for (int toY = 0; toY < 8; toY++) {
-                if (board.isFieldFree(toX, toY) && piece.canMove(board, toX, toY, fromX, fromY)) {
-                    targets.add(new Point(toX, toY));
-                }
-            }
+        // Setzt Fehlermeldung oder löscht sie basierend auf dem Ergebnis
+        if (!success) {
+            lastError = "Ungültiger Zug.";
+            if (presenter != null) presenter.showError(lastError);
+        } else {
+            lastError = "";
+            selectedCell = null;
         }
-        return targets;
     }
 
+    // Setter für den Presenter, um UI-Updates zu ermöglichen
     public void setPresenter(GamePresenter presenter) {
         this.presenter = presenter;
         refresh();
     }
 
+    // Aktualisiert die UI durch Aufruf des Presenters mit dem aktuellen ViewState
     private void refresh() {
         if (presenter != null) presenter.render(getViewState());
     }
 
+    // Startet das Spiel basierend auf dem Modus (NORMAL oder DEBUG)
     public void startGame() {
-    if (mode == Mode.DEBUG) {
-        startDebugMode();
-    } else {
-        startNormalMode();
-    }
-}
-    private void startNormalMode() {
-        board.initialize();
-        currentPlayer = player1;
-        refresh();
-    }
-
-    private void startDebugMode() {
-        board.getClearBoard();
-        currentPlayer = player1;
-        refresh();
+        if (mode == Mode.NORMAL) {
+            // Standardbrett initialisieren
+            board.initialize();
+            currentPlayer = player1;
+            refresh();
+        } else {
+            // Leeres Brett für Debug-Modus
+            board.getClearBoard();
+            currentPlayer = player1;
+            refresh();
+        }
     }
 
+    // Getter für den aktuellen Spielmodus, damit die UI entsprechend reagieren kann
     public Mode getMode() {
         return mode;
     }
 
+    // Getter für den aktuellen Spieler
     public Player getCurrentPlayer() {
         return currentPlayer;
     }
 
+    // Methode zum Setzen eines weißen Steins an einer bestimmten Position
+    // Wird im Debug-Modus verwendet, um das Brett manuell zu konfigurieren
     public void setWhitePiece(int i, int j) {
         board.setWhitePiece(i, j);
+        // Wenn der weiße Stein auf die letzte Reihe gesetzt wird, wird er sofort zur Dame befördert
         if ((i == 0)) {
             board.promotetoDame(i, j);
         }
     }
 
+    // Methode zum Setzen eines schwarzen Steins an einer bestimmten Position
+    // Wird im Debug-Modus verwendet, um das Brett manuell zu konfigurieren
     public void setBlackPiece(int i, int j) {
         board.setBlackPiece(i, j);
+        // Wenn der schwarze Stein auf die letzte Reihe gesetzt wird, wird er sofort zur Dame befördert
         if ((i == 7)) {
             board.promotetoDame(i, j);
         }
     }
 
+    // Validiert, ob ein Zug von Startposition nach Zielposition erlaubt ist
     public boolean isValidMove(int fromX, int fromY, int toX, int toY) {
         Piece piece = board.getPieceAt(fromX, fromY);
-        // Prüfe zuerst, ob überhaupt ein Stein vorhanden ist
+        // Prüfte, ob eine Figur an der Startposition vorhanden ist
         if (piece == null)
             return false;
-        // Prüfe, ob der Stein dem aktuellen Spieler gehört
+        
+        // Prüft, ob der Stein dem aktuellen Spieler gehört
         if (piece.getOwner() != currentPlayer)
             return false;
         
-                // Prüfe ob ein Schlagzwang existiert
+        // Prüft ob ein Schlagzwang existiert, wenn ja, dann muss zuerst geschlagen werden
         if (hasCaptureMoves(currentPlayer)) {
-            // Wenn Schlagzwang existiert, muss der Zug ein Schlagzug sein
+            // Wenn der Zug kein Schlag ist, ist er ungültig
             return isValidCapture(fromX, fromY, toX, toY);
         }
 
-        // Prüfe, ob das Zielfeld frei ist
+        // Prüft, ob das Zielfeld frei ist
         if (!board.isFieldFree(toX, toY))
             return false;
-            // Prüfe Bewegungsrichtung für normale Steine
         
+        // Prüft zuerst um welche Art von Stein es sich handelt
         if (piece.getType() == Piece.PieceType.MAN) {
-            // Weiße Steine dürfen nur nach oben
-            if (piece.getColor() == Piece.PieceColor.WHITE && toX >= fromX) {
-                return false;
-            }
-            // Schwarze Steine dürfen nur nach unten
-            if (piece.getColor() == Piece.PieceColor.BLACK && toX <= fromX) {
-                return false;
-            }
-            return Math.abs(toX - fromX) == 1 && Math.abs(toY - fromY) == 1;
+            return validMoveForMan(toX, toY, fromX, fromY);
+        } else {
+            return validMoveForKing(toX, toY, fromX, fromY);
         }
-        
-        return piece.canMove(board, toX, toY, fromX, fromY);
+    }
+
+    private boolean validMoveForMan(int toX,int toY,int fromX,int fromY) {
+        Piece piece = board.getPieceAt(fromX, fromY);
+        // Weiße Steine dürfen nur nach oben
+        if (piece.getColor() == Piece.PieceColor.WHITE && toX >= fromX) {
+            return false;
+        }
+        // Schwarze Steine dürfen nur nach unten
+        if (piece.getColor() == Piece.PieceColor.BLACK && toX <= fromX) {
+            return false;
+        }
+        return Math.abs(toX - fromX) == 1 && Math.abs(toY - fromY) == 1;
+    }
+
+    private boolean validMoveForKing(int toX,int toY,int fromX,int fromY) {
+        Piece piece = board.getPieceAt(fromX, fromY);
+        // Weiße Steine dürfen nur nach oben
+        // Logik für Dame-Steine, dass sie sich diagonal über beliebig viele Felder bewegen können
+            if (board.isFieldFree(toX, toY) && !board.isFieldOccupiedByOpponent(toX, toY, piece.getOwner())
+                    && Math.abs(toX - fromX) == Math.abs(toY - fromY) && !piece.mustCapture(board)) {
+                int dx = (toX - fromX) > 0 ? 1 : -1;
+                int dy = (toY - fromY) > 0 ? 1 : -1;
+                int steps = Math.abs(toX - fromX);
+                for (int i = 1; i < steps; i++) {
+                    int checkX = fromX + dx * i;
+                    int checkY = fromY + dy * i;
+                    if (!board.isFieldFree(checkX, checkY)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        return false;
     }
 
     private boolean hasCaptureMoves(Player player) {
@@ -482,7 +555,7 @@ public class GameController {
                             if (!board.isFieldFree(toX, toY) && board.isFieldOccupiedByOpponent(toX, toY, piece.getOwner())) {
                                 continue;
                             }
-                            if (piece.canMove(board, toX, toY, fromX, fromY)) {
+                            if (isValidMove(toX, toY, fromX, fromY)) {
                                 return false;
                             }
                         }
@@ -517,7 +590,7 @@ public class GameController {
                             if (!board.isFieldFree(toX, toY) && board.isFieldOccupiedByOpponent(toX, toY, piece.getOwner())) {
                                 continue;
                             }
-                            if (piece.canMove(board, toX, toY, fromX, fromY)) {
+                            if (isValidMove(toX, toY, fromX, fromY)) {
                                 return false;
                             }
                         }

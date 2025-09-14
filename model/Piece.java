@@ -30,12 +30,23 @@ public class Piece {
         return copy;
     }
 
+    public void move(Board board, int x, int y, int newX, int newY) {
+        board.freeField(x, y);
+        board.occupyField(newX, newY, this);
+        x = newX;
+        y = newY;
+    }
+
     public PieceColor getColor() {
         return color;
     }
 
     public PieceType getType() {
         return type;
+    }
+
+    public Player getPlayer() {
+        return owner;
     }
 
     public void setType(PieceType type) {
@@ -48,49 +59,6 @@ public class Piece {
 
     public void capture() {
         this.isCaptured = true;
-    }
-
-    public boolean canMove(Board board, int toX, int toY, int x, int y) {
-        // Logik, um zu überprüfen, ob das Stück zu der angegebenen Position erlaubt ist
-        if (!isMan()) {
-            // Dame: move any number of squares diagonally, path must be clear
-            if (board.isFieldFree(toX, toY) && !board.isFieldOccupiedByOpponent(toX, toY, owner)
-                    && Math.abs(toX - x) == Math.abs(toY - y) && !mustCapture(board)) {
-                int dx = (toX - x) > 0 ? 1 : -1;
-                int dy = (toY - y) > 0 ? 1 : -1;
-                int steps = Math.abs(toX - x);
-                for (int i = 1; i < steps; i++) {
-                    int checkX = x + dx * i;
-                    int checkY = y + dy * i;
-                    if (!board.isFieldFree(checkX, checkY)) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-        } else {
-            // Logik für normale Steine
-            if (board.isFieldFree(toX, toY) && !board.isFieldOccupiedByOpponent(toX, toY, owner)
-                    && Math.abs(toX - x) == 1 && Math.abs(toY - y) == 1 && !mustCapture(board)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public void move(Board board, int x, int y, int newX, int newY) {
-        // Spiel-Logik für das Bewegen des Stücks
-        if (canMove(board, newX, newY, x, y)) {
-            board.freeField(x, y);
-            board.occupyField(newX, newY, this);
-            x = newX;
-            y = newY;
-        }
-    }
-
-    public boolean isAtPromotionRow(int y) {
-        // Logik, um zu überprüfen, ob das Stück die Beförderungsreihe erreicht hat
-        return (color == PieceColor.WHITE && y == 0) || (color == PieceColor.BLACK && y == 7);
     }
 
     public boolean isMan() {
@@ -123,8 +91,9 @@ public class Piece {
         return color + " " + type + " at (" + x + "," + y + ")";
     }
 
-    public boolean mustCapture(Board board) {
+            public boolean mustCapture(Board board) {
         // Checkt, ob dieser Stein einen Schlagzug machen muss
+        Piece piece = board.getPieceAt(0, 0); // Dummy-Wert, wird nicht verwendet
         if (!isMan()) {
             // Logic for Dame pieces
             for (int dx = -1; dx <= 1; dx += 2) {
@@ -136,7 +105,7 @@ public class Piece {
             }
         } else {
             // Logic for normal pieces
-            if (this.color == PieceColor.WHITE) {
+            if (piece.getColor() == Piece.PieceColor.WHITE) {
                 // Logic for the white player
                 for (int dx = -1; dx <= 1; dx += 2) {
                     if (canCapture(board, x + dx, y - 1, x + 2 * dx, y - 2)) {
@@ -162,4 +131,6 @@ public class Piece {
         }
         return board.isFieldOccupiedByOpponent(midX, midY, owner) && board.isFieldFree(toX, toY);
     }
+
+
 }
