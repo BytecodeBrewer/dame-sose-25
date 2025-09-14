@@ -149,6 +149,7 @@ public class MainView extends JPanel implements GamePresenter{
         endButton.addActionListener(_ -> {
             dlg.dispose();
             frame.dispose();
+            SwingUtilities.invokeLater(() -> new StartFrame());
         });
 
         dlg.setLayout(new BorderLayout());

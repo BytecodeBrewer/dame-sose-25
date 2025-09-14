@@ -2,6 +2,7 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class GameController {
     private final Board board;
     private Player player1;
@@ -332,23 +333,33 @@ public class GameController {
         board.occupyField(toX, toY, piece);
         piece.move(board, fromX, fromY, toX, toY);
 
-        // Promotion bei normalem Stein
-        if (piece.getType() == Piece.PieceType.MAN) {
-            if ((piece.getColor() == Piece.PieceColor.WHITE && toX == 0) ||
-                (piece.getColor() == Piece.PieceColor.BLACK && toX == 7)) {
-                board.promotetoDame(toX, toY);
-            }
-        }
+
 
         // Nur wenn der aktuelle Zug ein Schlag war UND noch ein Schlag möglich ist,
         // bleibt der Spieler dran (Mehrfachschlag). Nach einem normalen Zug IMMER Wechsel.
         if (isCapture && canCaptureInAnyDirection(toX, toY)) {
             arePiecesLeft();
             arePieceStuck();
+            System.out.println("Mehrfachschlag möglich, Spieler bleibt dran.");
+            if (piece.getType() == Piece.PieceType.MAN) {
+            if ((piece.getColor() == Piece.PieceColor.WHITE && toX == 0) ||
+                (piece.getColor() == Piece.PieceColor.BLACK && toX == 7)) {
+                System.out.println("Stein wird zur Dame befördert! 1");
+                board.promotetoDame(toX, toY);
+                switchPlayer();
+            }
+        }
         } else {
+            System.out.println("Mehrfachschlag ist nicht möglich, Spieler bleibt dran.");
+            if (piece.getType() == Piece.PieceType.MAN) {
+            if ((piece.getColor() == Piece.PieceColor.WHITE && toX == 0) ||
+                (piece.getColor() == Piece.PieceColor.BLACK && toX == 7)) {
+                board.promotetoDame(toX, toY);
+            }
             arePiecesLeft();
             arePieceStuck();
             switchPlayer();
+            }
         }
 
         if (presenter != null) presenter.render(getViewState());

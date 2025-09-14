@@ -21,7 +21,6 @@ public class Board {
     }
 
     private void initializeBoard() {
-        System.out.println(" Steine für Spieler 1 (Weiß) gesetzt."); 
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
                 if ((i + j) % 2 != 0) {
