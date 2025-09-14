@@ -37,20 +37,20 @@ public class StartFrame extends JFrame {
         panel.add(Box.createVerticalGlue()); // schiebt nach Mitte
 
         // Button-Actions
-        startButton.addActionListener(s -> {
+        startButton.addActionListener(startbutton -> {
             GameController controller = new GameController(GameController.Mode.NORMAL);
             MainView main = new MainView(controller);
             main.setVisible(true);
             setVisible(false);
         });
 
-        debugButton.addActionListener(d -> {
+        debugButton.addActionListener(debugbutton -> {
             GameController controller = new GameController(GameController.Mode.DEBUG);
             MainView main = new MainView(controller);
             main.setVisible(true);
             setVisible(false);
         });
-        endButton.addActionListener(e -> System.exit(0));
+        endButton.addActionListener(endbutton -> System.exit(0));
 
         this.add(panel);
         this.setSize(800, 600);
