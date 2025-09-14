@@ -64,19 +64,19 @@ public class GameController {
         Cell[][] grid = new Cell[8][8];
         for (int row = 0; row < 8; row++) {
             for (int column = 0; column < 8; column++) {
-                Piece p = board.getPieceAt(row, column);
-                grid[row][column] = mapPieceToCell(p);
+                Piece piece = board.getPieceAt(row, column);
+                grid[row][column] = mapPieceToCell(piece);
             }
         }
         return grid;
     }
 
     // Hilfsmethode, die eine Piece-Instanz in den entsprechenden Cell-Enum-Wert umwandelt
-    private Cell mapPieceToCell(Piece p) {
+    private Cell mapPieceToCell(Piece piece) {
         // Wenn kein Stein vorhanden ist, gib EMPTY zurück
-        if (p == null) return Cell.EMPTY;
-        boolean isWhite = (p.getColor() == Piece.PieceColor.WHITE);
-        boolean isMan = p.isMan();
+        if (piece == null) return Cell.EMPTY;
+        boolean isWhite = (piece.getColor() == Piece.PieceColor.WHITE);
+        boolean isMan = piece.isMan();
         
         // Rückgabe des entsprechenden Cell-Werts basierend auf Farbe und Typ
         if (isWhite) {
@@ -101,14 +101,14 @@ public class GameController {
     }
 
     // Handhabt die anfängliche Auswahl einer Zelle
-    private boolean handleInitialSelection(int row, int col) {
+    private boolean handleInitialSelection(int row, int column) {
         // Nur wenn noch keine Zelle ausgewählt ist
         if (selectedCell != null) return false;
 
-        Piece piece = board.getPieceAt(row, col);
+        Piece piece = board.getPieceAt(row, column);
         // Nur Auswahl erlauben, wenn eine Figur des aktuellen Spielers vorhanden ist
         if (piece != null && piece.getColor() == currentPlayer.getColor()) {
-            selectedCell = new Point(row, col);
+            selectedCell = new Point(row, column);
             lastError = "";
         } else {
             lastError = "Ungültige Auswahl.";
@@ -120,11 +120,11 @@ public class GameController {
     }
 
     // Handhabt das Deselektieren der aktuell ausgewählten Zelle
-    private boolean handleDeselect(int row, int col) {
+    private boolean handleDeselect(int row, int column) {
         // Wenn keine Zelle ausgewählt ist, nichts zu tun
         if (selectedCell == null) return false;
         // Wenn die angeklickte Zelle nicht die ausgewählte ist, nichts zu tun
-        if (selectedCell.x != row || selectedCell.y != col) return false;
+        if (selectedCell.x != row || selectedCell.y != column) return false;
 
         selectedCell = null;
         lastError = "";
@@ -150,9 +150,9 @@ public class GameController {
     }
 
     // Handhabt den Versuch, einen Zug von der ausgewählten Zelle zur angeklickten Zelle auszuführen
-    private void handleMoveAttempt(int row, int col) {
+    private void handleMoveAttempt(int row, int column) {
         // Prüft, ob der Zug gültig ist und speichert das Ergebnis
-        boolean success = makeMove(selectedCell.x, selectedCell.y, row, col);
+        boolean success = makeMove(selectedCell.x, selectedCell.y, row, column);
 
         // Setzt Fehlermeldung oder löscht sie basierend auf dem Ergebnis
         if (!success) {
@@ -202,21 +202,21 @@ public class GameController {
 
     // Methode zum Setzen eines weißen Steins an einer bestimmten Position
     // Wird im Debug-Modus verwendet, um das Brett manuell zu konfigurieren
-    public void setWhitePiece(int i, int j) {
-        board.setWhitePiece(i, j);
+    public void setWhitePiece(int row, int column) {
+        board.setWhitePiece(row, column);
         // Wenn der weiße Stein auf die letzte Reihe gesetzt wird, wird er sofort zur Dame befördert
-        if ((i == 0)) {
-            board.promotetoDame(i, j);
+        if ((row == 0)) {
+            board.promotetoDame(row, column);
         }
     }
 
     // Methode zum Setzen eines schwarzen Steins an einer bestimmten Position
     // Wird im Debug-Modus verwendet, um das Brett manuell zu konfigurieren
-    public void setBlackPiece(int i, int j) {
-        board.setBlackPiece(i, j);
+    public void setBlackPiece(int row, int column) {
+        board.setBlackPiece(row, column);
         // Wenn der schwarze Stein auf die letzte Reihe gesetzt wird, wird er sofort zur Dame befördert
-        if ((i == 7)) {
-            board.promotetoDame(i, j);
+        if ((row == 7)) {
+            board.promotetoDame(row, column);
         }
     }
 
@@ -291,9 +291,9 @@ public class GameController {
 
     // Prüft, ob der aktuelle Spieler irgendwo auf dem Brett schlagen kann
     private boolean hasCaptureMoves(Player player) {
-        for (int x = 0; x < 8; x++) {
-            for (int y = 0; y < 8; y++) {
-                if (canCaptureAtPosition(x, y, player)) {
+        for (int fromX = 0; fromX < 8; fromX++) {
+            for (int fromY = 0; fromY < 8; fromY++) {
+                if (canCaptureAtPosition(fromX, fromY, player)) {
                     return true;
                 }
             }
@@ -302,32 +302,32 @@ public class GameController {
     }
 
     // Prüft, ob an einer bestimmten Position ein Schlag möglich ist
-    private boolean canCaptureAtPosition(int x, int y, Player player) {
-        return canPieceCapture(x, y, player);
+    private boolean canCaptureAtPosition(int fromX, int fromY, Player player) {
+        return canPieceCapture(fromX, fromY, player);
     }
 
     // Prüft, ob ein bestimmter Stein des Spielers schlagen kann
-    private boolean canPieceCapture(int x, int y, Player player) {
-        Piece piece = board.getPieceAt(x, y);
+    private boolean canPieceCapture(int fromX, int fromY, Player player) {
+        Piece piece = board.getPieceAt(fromX, fromY);
 
         // Prüft, ob eine Figur an der Position vorhanden ist und ob sie dem Spieler gehört
         if (piece == null || piece.getOwner() != player) return false;
 
         // Ruft die entsprechende Schlagprüfungslogik basierend auf dem Figurentyp auf
         return piece.getType() == Piece.PieceType.MAN
-                ? canManCapture(x, y)
-                : canKingCapture(x, y);
+                ? canManCapture(fromX, fromY)
+                : canKingCapture(fromX, fromY);
     }
 
     // Prüft mögliche Schlagzüge für einen normalen Stein (2 Felder Sprung)
-    private boolean canManCapture(int x, int y) {
+    private boolean canManCapture(int fromX, int fromY) {
         int[][] directions = {{2, 2}, {2, -2}, {-2, 2}, {-2, -2}};
         for (int[] dir : directions) {
-            int toX = x + dir[0];
-            int toY = y + dir[1];
+            int toX = fromX + dir[0];
+            int toY = fromY + dir[1];
 
             // Prüft, ob das Zielfeld innerhalb des Brettes liegt und ob ein gültiger Schlag möglich ist
-            if (!board.outOfBounds(toX, toY) && isValidCapture(x, y, toX, toY)) {
+            if (!board.outOfBounds(toX, toY) && isValidCapture(fromX, fromY, toX, toY)) {
                 return true;
             }
         }
@@ -372,46 +372,48 @@ public class GameController {
 
     if (!board.isFieldFree(toX, toY)) return false;
 
-    int dx = toX - fromX;
-    int dy = toY - fromY;
-    if (Math.abs(dx) != Math.abs(dy)) return false;
+    int deltaRow = toX - fromX;
+    int deltaColumn = toY - fromY;
+    if (Math.abs(deltaRow) != Math.abs(deltaColumn)) return false;
 
     if (piece.getType() == Piece.PieceType.MAN) {
-        return validateManCapture(fromX, fromY, toX, toY, dx, dy);
+        return validateManCapture(fromX, fromY, toX, toY, deltaRow, deltaColumn);
     } else {
-        return validateKingCapture(fromX, fromY, toX, toY, dx, dy);
+        return validateKingCapture(fromX, fromY, toX, toY, deltaRow, deltaColumn);
     }
 }
 
     // Prüft normalen 2er-Sprung
-    private boolean validateManCapture(int fromX, int fromY, int toX, int toY, int dx, int dy) {
-        if (Math.abs(dx) != 2 || Math.abs(dy) != 2) return false;
-        int mx = (fromX + toX) / 2;
-        int my = (fromY + toY) / 2;
-        Piece mid = board.getPieceAt(mx, my);
-        return mid != null && mid.getOwner() != currentPlayer;
+    private boolean validateManCapture(int fromX, int fromY, int toX, int toY, int deltaRow, int deltaColumn) {
+        if (Math.abs(deltaRow) != 2 || Math.abs(deltaColumn) != 2) return false;
+        int jumpedRow  = (fromX + toX) / 2;
+        int jumpedColumn = (fromY + toY) / 2;
+        Piece jumpedPiece  = board.getPieceAt(jumpedRow , jumpedColumn);
+        return jumpedPiece  != null && jumpedPiece.getOwner() != currentPlayer;
     }
 
     // Prüft die "fliegende" Dame-Schlaglogik
-    private boolean validateKingCapture(int fromX, int fromY, int toX, int toY, int dx, int dy) {
-        int stepX = Integer.signum(dx);
-        int stepY = Integer.signum(dy);
-        int x = fromX + stepX, y = fromY + stepY;
+    private boolean validateKingCapture(int fromX, int fromY, int toX, int toY, int deltaRow, int deltaColumn) {
+        int stepX = Integer.signum(deltaRow);
+        int stepY = Integer.signum(deltaColumn);
+        int currentRow = fromX + stepX;
+        int currentColumn = fromY + stepY;
 
         Piece captured = null;
         int capturedX = -1, capturedY = -1;
 
-        while (x != toX && y != toY) {
-            if (!checkKingPathStep(x, y, captured)) return false;
-            if (board.getPieceAt(x, y) != null && board.getPieceAt(x, y).getOwner() != currentPlayer) {
-                captured = board.getPieceAt(x, y);
-                capturedX = x;
-                capturedY = y;
+        while (currentRow != toX && currentColumn != toY) {
+            if (!checkKingPathStep(currentRow, currentColumn, captured)) return false;
+            if (board.getPieceAt(currentRow, currentColumn) != null && board.getPieceAt(currentRow, currentColumn).getOwner() != currentPlayer) {
+                captured = board.getPieceAt(currentRow, currentColumn);
+                capturedX = currentRow;
+                capturedY = currentColumn;
             }
-            x += stepX;
-            y += stepY;
+            currentRow += stepX;
+            currentColumn += stepY;
         }
 
+        // Prüft, dass die Dame genau hinter der zu schlagenden Figur landen darf und nicht weiter
         return captured != null
             && toX == capturedX + stepX
             && toY == capturedY + stepY;
@@ -572,8 +574,8 @@ public class GameController {
             }
         }
         // Setzt die Liste der gefangenen Figuren zurück, um den Status für die nächste Überprüfung zu aktualisieren
-        player1.clearCapturedPieces();
-        player2.clearCapturedPieces();
+        player1.clearStuckPieces();
+        player2.clearStuckPieces();
     }
 
     // Prüft, ob der Spieler noch gültige Züge hat
@@ -584,7 +586,7 @@ public class GameController {
             }
         }
         // Spieler hat gültige Züge, wenn er nicht alle Figuren verloren hat
-        return player.getCapturedPieces().size() < player.getPieceCount();
+        return player.getStuckPieces().size() < player.getPieceCount();
     }
 
     // Prüft für ein einzelnes Feld, ob die Figur dort blockiert ist
@@ -599,7 +601,7 @@ public class GameController {
 
         // Wenn die Figur blockiert ist, wird sie zur Liste der gefangenen Figuren hinzugefügt
         if (isPieceStuck(piece, x, y)) {
-            player.capturePiece(piece);
+            player.stuckPiece(piece);
         }
     }
 
