@@ -87,17 +87,28 @@ public class BoardView extends JPanel {
                 boolean isWhite = (cell == GameController.Cell.WM || cell == GameController.Cell.WK);
                 boolean isMan   = (cell == GameController.Cell.WM || cell == GameController.Cell.BM);
 
-                g.setColor(isWhite ? Color.WHITE : Color.BLACK);
-                g.fillOval(j * tileSize + 10, i * tileSize + 10, tileSize - 20, tileSize - 20);
+                int baseX = j * tileSize + 10;
+                int baseY = i * tileSize + 10;
+                int stoneSize = tileSize - 20;
 
-                if (!isMan) { // Dame
-                g.setFont(g.getFont().deriveFont(Font.BOLD, Math.max(14f, tileSize * 0.6f)));
-                g.setColor(isWhite ? Color.BLACK : Color.WHITE);
-                String text = "\u2655";
-                FontMetrics fm = g.getFontMetrics();
-                int tx = j * tileSize + (tileSize - fm.stringWidth(text)) / 2;
-                int ty = i * tileSize + (tileSize + fm.getAscent() - fm.getDescent()) / 2;
-                g.drawString(text, tx, ty);
+                // Grauer Rand (etwas größerer Kreis)
+                g.setColor(Color.GRAY);
+                g.fillOval(baseX - 2, baseY - 2, stoneSize + 4, stoneSize + 4);
+
+                // Eigentliche Spielfigur
+                g.setColor(isWhite ? Color.WHITE : Color.BLACK);
+                g.fillOval(baseX, baseY, stoneSize, stoneSize);
+
+                // Wenn Dame → zweiten Stein leicht versetzt zeichnen
+                if (!isMan) {
+                    int offset = Math.max(4, tileSize / 12); // Versatz nach oben
+                    // oberer Rand
+                    g.setColor(Color.GRAY);
+                    g.fillOval(baseX - 2, baseY - offset - 2, stoneSize + 4, stoneSize + 4);
+
+                    // oberer Stein
+                    g.setColor(isWhite ? Color.WHITE : Color.BLACK);
+                    g.fillOval(baseX, baseY - offset, stoneSize, stoneSize);
                 }
             }
             }
