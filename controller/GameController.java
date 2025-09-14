@@ -2,6 +2,8 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller.GamePresenter;
+
 public class GameController {
     private final Board board;
     private Player player1;
