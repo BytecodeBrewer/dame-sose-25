@@ -1,4 +1,4 @@
-public class App {
+public class Main {
     public static void main(String[] args) {        
         // Es ist das Kernstück des MVC Musters
         // Es wird der Controller instanziert, der die Logik des Spiels steuert
