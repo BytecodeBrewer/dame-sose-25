@@ -226,22 +226,37 @@ public class GameController {
     }
 
     private boolean canCaptureInAnyDirection(int x, int y) {
-        // Prüfe alle 4 möglichen Schlagrichtungen
-        int[][] directions = {{2,2}, {2,-2}, {-2,2}, {-2,-2}};
+    Piece piece = board.getPieceAt(x, y);
+    if (piece == null) return false;
 
+    if (piece.getType() == Piece.PieceType.MAN) {
+        // Nur 2er-Sprünge
+        int[][] directions = {{2,2}, {2,-2}, {-2,2}, {-2,-2}};
         for (int[] dir : directions) {
-            if (board.outOfBounds(x + dir[0], y + dir[1])) {
-                continue;
-            }
             int toX = x + dir[0];
             int toY = y + dir[1];
-            
-            if (isValidCapture(x, y, toX, toY)) {
+            if (!board.outOfBounds(toX, toY) && isValidCapture(x, y, toX, toY)) {
                 return true;
             }
         }
-        return false;
+    } else {
+        // Dame: alle Felder auf den Diagonalen durchgehen
+        int[][] directions = {{1,1}, {1,-1}, {-1,1}, {-1,-1}};
+        for (int[] dir : directions) {
+            int stepX = dir[0], stepY = dir[1];
+            int toX = x + stepX, toY = y + stepY;
+            while (!board.outOfBounds(toX, toY)) {
+                if (isValidCapture(x, y, toX, toY)) {
+                    return true;
+                }
+                toX += stepX;
+                toY += stepY;
+            }
+        }
     }
+    return false;
+}
+
 
     private boolean isValidCapture(int fromX, int fromY, int toX, int toY) {
         Piece piece = board.getPieceAt(fromX, fromY);
@@ -268,6 +283,7 @@ public class GameController {
             int stepy = Integer.signum(dy);
             int x = fromX + stepx, y = fromY + stepy;
             Piece captured = null;
+            int capturedX = -1, capturedY = -1;
 
             while (x != toX && y != toY) {
                 Piece p = board.getPieceAt(x, y);
@@ -279,12 +295,16 @@ public class GameController {
                 } else {
                     // Gegnerische Figur
                     if (captured != null) return false; // schon eine gesehen -> ungültig
-                    captured = p;
+                        captured = p;
+                        capturedX = x;
+                        capturedY = y;
                 }
                 x += stepx; y += stepy;
             }
-            // gültig nur, wenn genau eine gegnerische Figur übersprungen wurde
-            return captured != null;
+            // gültig nur, wenn genau eine gegnerische Figur übersprungen wurde und das Zielfeld hinter ihr liegt
+            return captured != null
+                && toX == capturedX + stepx
+                && toY == capturedY + stepy;
         }
     }
 
@@ -340,26 +360,23 @@ public class GameController {
         if (isCapture && canCaptureInAnyDirection(toX, toY)) {
             arePiecesLeft();
             arePieceStuck();
-            System.out.println("Mehrfachschlag möglich, Spieler bleibt dran.");
             if (piece.getType() == Piece.PieceType.MAN) {
             if ((piece.getColor() == Piece.PieceColor.WHITE && toX == 0) ||
                 (piece.getColor() == Piece.PieceColor.BLACK && toX == 7)) {
-                System.out.println("Stein wird zur Dame befördert! 1");
                 board.promotetoDame(toX, toY);
                 switchPlayer();
             }
         }
         } else {
-            System.out.println("Mehrfachschlag ist nicht möglich, Spieler bleibt dran.");
             if (piece.getType() == Piece.PieceType.MAN) {
             if ((piece.getColor() == Piece.PieceColor.WHITE && toX == 0) ||
                 (piece.getColor() == Piece.PieceColor.BLACK && toX == 7)) {
                 board.promotetoDame(toX, toY);
             }
+            }
             arePiecesLeft();
             arePieceStuck();
             switchPlayer();
-            }
         }
 
         if (presenter != null) presenter.render(getViewState());
