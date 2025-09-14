@@ -3,6 +3,8 @@ import java.awt.*;
 
 public class StartFrame extends JFrame {
 
+    // Hauptfenster für die Spielauswahl
+    // Ermöglicht Start eines normalen Spiels oder Debug-Modus
     public StartFrame() {
         this.setTitle("Dame Spiel - Start");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -36,7 +38,8 @@ public class StartFrame extends JFrame {
         panel.add(endButton);
         panel.add(Box.createVerticalGlue()); // schiebt nach Mitte
 
-        // Button-Actions
+        // Button-Aktionen definieren
+        // Normales Spiel starten
         startButton.addActionListener(startbutton -> {
             GameController controller = new GameController(GameController.Mode.NORMAL);
             MainView main = new MainView(controller);
@@ -44,12 +47,14 @@ public class StartFrame extends JFrame {
             setVisible(false);
         });
 
+        // Debug-Modus starten
         debugButton.addActionListener(debugbutton -> {
             GameController controller = new GameController(GameController.Mode.DEBUG);
             MainView main = new MainView(controller);
             main.setVisible(true);
             setVisible(false);
         });
+        // Spiel beenden
         endButton.addActionListener(endbutton -> System.exit(0));
 
         this.add(panel);
