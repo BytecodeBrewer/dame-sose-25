@@ -1,0 +1,161 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide circle
+hide empty methods
+
+' ===== Interface =====
+interface GamePresenter {
+  +render(GameController::ViewState vs)
+  +showError(String message)
+  +showWinnerDialog(String playerName)
+  ..optional..
+  +highlight(java.awt.Point cell)
+}
+
+' ===== Controller =====
+class GameController {
+  -Board board
+  -Player player1
+  -Player player2
+  -Player currentPlayer
+  -GamePresenter presenter
+  -Mode mode
+  -java.util.List<java.awt.Point> currentLegalTargets
+  -java.awt.Point selectedCell
+  -String lastError
+  +GameController(Mode mode)
+  +setPresenter(GamePresenter presenter)
+  +startGame()
+  +onCellClick(int row, int column)
+  +getViewState(): ViewState
+  +getCurrentPlayer(): Player
+}
+
+class "GameController::ViewState" as ViewState {
+  +Cell[][] grid
+  +java.util.List<java.awt.Point> legalTargets
+  +java.awt.Point selected
+  +String currentPlayerName
+  +String errorMessage
+}
+
+enum "GameController::Mode" as GCMode {
+  NORMAL
+  DEBUG
+}
+
+enum "GameController::Cell" as GCCell {
+  EMPTY
+  WM
+  WK
+  BM
+  BK
+}
+
+' ===== Model =====
+class Board {
+  -Piece[][] board
+  -final int SIZE = 8
+  -Player player1
+  -Player player2
+  +Board(Player p1, Player p2)
+  +getPieceAt(int x, int y): Piece
+  +setPieceAt(int x, int y, Piece piece)
+  +movePiece(int fromX,int fromY,int toX,int toY)
+  +removePiece(int x,int y)
+  +countPieces(Piece.PieceColor color): int
+  +outOfBounds(int x,int y): boolean
+  +placeNormalPieceBlack(int x,int y)
+  +placeNormalPieceWhite(int x,int y)
+  +promotetoDame(int x,int y)
+}
+
+class Piece {
+  enum PieceType { MAN, DAME }
+  enum PieceColor { WHITE, BLACK }
+  -PieceColor color
+  -PieceType type
+  -boolean isCaptured
+  -Player owner
+  -int x
+  -int y
+  +Piece(PieceColor color, PieceType type, Player owner, int x, int y)
+  +getColor(): PieceColor
+  +getType(): PieceType
+  +setType(PieceType type)
+  +setCaptured(boolean c)
+  +setPosition(int x, int y)
+  +canMove(Board board, int fromX, int fromY, int toX, int toY): boolean
+  +canCapture(Board board, int fromX, int fromY, int toX, int toY): boolean
+  +canAnyCapture(Board board): boolean
+}
+
+class Player {
+  -String name
+  -java.util.List<Piece> pieces
+  -java.util.List<Piece> stuckPieces
+  +Player(String name)
+  +getName(): String
+  +addPiece(Piece p)
+  +removePiece(Piece p)
+  +getPieces(): java.util.List<Piece>
+  +getStuckPieces(): java.util.List<Piece>
+  +getPieceCount(): int
+  +clearPieces()
+  +getColor(): Piece.PieceColor
+}
+
+' ===== View =====
+class BoardView {
+  -final GameController gameController
+  -java.awt.event.MouseListener placementListener
+  -boolean placementLocked
+  +BoardView(GameController gameController)
+  +setPlacingPieceColor(String color)
+  +setPlacementLocked(boolean locked)
+  +paintComponent(java.awt.Graphics g)
+}
+
+class MainView implements GamePresenter {
+  -final GameController gameController
+  -BoardView boardView
+  -javax.swing.JLabel currentPlayerLabel
+  -javax.swing.JLabel errorLabel
+  -javax.swing.JFrame frame
+  -javax.swing.JPanel pieceSelectionPanel
+  +MainView(GameController controller)
+  +render(GameController::ViewState vs)
+  +showError(String message)
+  +showWinnerDialog(String playerName)
+}
+
+class StartFrame extends javax.swing.JFrame {
+  +StartFrame()
+}
+
+class Main {
+  +main(String[] args)
+}
+
+' ===== Beziehungen (aus dem Code) =====
+Main --> StartFrame : creates
+StartFrame --> GameController : creates
+StartFrame --> MainView : creates
+
+MainView ..|> GamePresenter
+MainView --> GameController
+MainView o-- BoardView
+MainView ..> StartFrame : restart
+
+BoardView --> GameController
+
+GameController --> Board
+GameController --> Player : uses
+GameController --> GamePresenter : calls
+GameController ..> ViewState : returns
+
+Board --> Piece : contains
+Board --> Player : holds
+Piece --> Player : owner
+
+@enduml

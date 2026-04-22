@@ -70,7 +70,7 @@ public class MainView extends JPanel implements GamePresenter{
         JMenu gameMenu = new JMenu("Game");
 
         JMenuItem endItem = new JMenuItem("Runde beenden");
-        endItem.addActionListener(_ -> {
+        endItem.addActionListener(z -> {
             frame.dispose();
             SwingUtilities.invokeLater(StartFrame::new);
         });
@@ -122,17 +122,17 @@ public class MainView extends JPanel implements GamePresenter{
 
     // Fügt den Buttons ihre Listener hinzu
     private void addDebugButtonListeners(JButton whiteBtn, JButton blackBtn, JButton startBtn) {
-        whiteBtn.addActionListener(_ -> {
+        whiteBtn.addActionListener(e -> {
             boardView.setPlacingPieceColor("WHITE");
             highlightActiveButton(whiteBtn, blackBtn);
         });
 
-        blackBtn.addActionListener(_ -> {
+        blackBtn.addActionListener(r-> {
             boardView.setPlacingPieceColor("BLACK");
             highlightActiveButton(blackBtn, whiteBtn);
         });
 
-        startBtn.addActionListener(_ -> onStartGame(whiteBtn, blackBtn, startBtn));
+        startBtn.addActionListener(z -> onStartGame(whiteBtn, blackBtn, startBtn));
     }
 
     // Hebt den aktiven Button hervor
