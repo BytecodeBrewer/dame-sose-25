@@ -1,37 +1,32 @@
-# Contributing Guide
+﻿# Contributing
 
-Danke für dein Interesse am Projekt.
+Dieses Projekt ist nicht mehr aktiv in Entwicklung und wird aktuell nur noch eingeschränkt gepflegt. Beiträge sind daher eher für kleinere Korrekturen, Dokumentationsverbesserungen oder technische Aufräumarbeiten sinnvoll.
 
-## Grundregeln
+## Was hier noch sinnvoll ist
+
+- Tippfehler, fehlerhafte Formulierungen oder kaputte Umlaute korrigieren
+- Kleine Bugfixes mit klar begrenztem Umfang einbringen
+- Dokumentation verbessern oder den Projektkontext klarer machen
+- Technische Altlasten vorsichtig bereinigen, ohne das Verhalten unnötig zu verändern
+
+## Was aktuell eher nicht geplant ist
+
+- Größere Feature-Erweiterungen ohne vorherige Abstimmung
+- Umfangreiche Refactorings quer durch die gesamte Codebasis
+- Grundlegende Architekturumbauten
+
+## Wenn du trotzdem etwas beitragen willst
 
 1. Änderungen bitte klein und nachvollziehbar halten.
-2. Commit-Nachrichten klar formulieren (was + warum).
-3. Für größere Änderungen zuerst ein kurzes Issue/Design-Note anlegen.
-4. Java-Logik nicht „nebenbei“ umbauen, ohne den Impact zu dokumentieren.
+2. Im Zweifel erst kurz beschreiben, was angepasst werden soll und warum.
+3. Vor einem Beitrag lokal kompilieren:
 
-## Empfohlener Workflow
+```bash
+javac Main.java controller/*.java view/*.java model/*.java
+```
 
-1. Branch erstellen (`feature/...`, `fix/...`, `docs/...`).
-2. Änderungen lokal implementieren.
-3. Kompilieren:
+4. Danach kurz prüfen, ob sich das Spiel noch starten lässt.
 
-   ```bash
-   javac Main.java controller/*.java view/*.java model/*.java
-   ```
+## Erwartung an Beiträge
 
-4. Kurz testen (Startfenster, Normal/Debug Start).
-5. Commit + Pull Request mit kurzer Risiko-Einschätzung.
-
-## Pull-Request-Checkliste
-
-- [ ] Ziel der Änderung im PR-Text beschrieben.
-- [ ] Lokale Kompilierung erfolgreich.
-- [ ] Dokumentation angepasst (falls Verhalten/Struktur geändert wurde).
-- [ ] Keine unnötigen Refactorings ohne Begründung.
-
-## Code-Style (leichtgewichtig)
-
-- Lesbare Methodennamen und sprechende Variablen.
-- Kommentare nur dort, wo sie Mehrwert liefern.
-- Keine toten Codepfade / auskommentierten Blöcke einchecken.
-
+Pull Requests sollten klar begründet sein und zum heutigen Charakter des Repositories passen: ein archiviertes bzw. stillgelegtes Uni-Projekt, das in erster Linie als Referenz erhalten bleibt.
