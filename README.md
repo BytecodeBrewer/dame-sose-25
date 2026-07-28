@@ -1,75 +1,94 @@
-﻿# Dame-Spiel in Java
+﻿# Checkers
 
-> [!WARNING]
-> Archived Repository: Dieses Projekt ist stillgelegt und wird nicht mehr aktiv weiterentwickelt.
+Checkers is a playable Java board game developed as a three-person university project during the Summer Semester 2025.
 
-Dieses Repository dokumentiert ein Uni-Projekt aus dem Sommersemester 2025. Entwickelt wurde das Projekt in einem Drei-Personen-Team im Rahmen einer Lehrveranstaltung und zeigt die Umsetzung eines spielbaren Dame-Spiels in Java.
+The project focuses on object-oriented design, graphical user interface development, game-state handling, and collaborative implementation.
 
-## Überblick
+## Features
 
-- Spielbares Dame-Spiel mit grafischer Oberfläche
-- Strukturierte Aufteilung in `model/`, `view/` und `controller/`
-- Normalmodus und Debug-Modus zum Testen von Spielsituationen
-- Hochschulprojekt mit Fokus auf Architektur, Spiellogik und Teamarbeit
+- Playable checkers game with a graphical user interface
+- Separation into `model/`, `view/`, and `controller/`
+- Standard game mode with the regular starting position
+- Debug mode for preparing and testing custom board situations
+- UML documentation of the project structure
 
-## Projektstruktur
+## Project Structure
 
 ```text
 .
-|-- Main.java                 Einstiegspunkt der Anwendung
-|-- controller/               Spielfluss und Zuglogik
-|-- model/                    Spielbrett, Figuren und Zustände
-|-- view/                     Oberfläche und Brettdarstellung
-|-- CONTRIBUTING.md           Hinweise zum heutigen Projektstatus
-|-- dame.uml                  UML-Quelldatei
-`-- klassendiagramm.png       Klassendiagramm als Bild
+├── Main.java                 Application entry point
+├── controller/               Game flow and move handling
+├── model/                    Board, pieces, and game state
+├── view/                     User interface and board rendering
+├── CONTRIBUTING.md           Contribution information
+├── dame.uml                  UML source file
+└── klassendiagramm.png       Exported class diagram
 ```
 
-## Klassendiagramm
+## Class Diagram
 
-![Klassendiagramm](klassendiagramm.png)
+![Class diagram](klassendiagramm.png)
 
-Die zugehörige UML-Datei liegt unter [dame.uml](dame.uml).
+The corresponding UML source file is available in [`dame.uml`](dame.uml).
 
-## Voraussetzungen
+## Requirements
 
-Empfohlen wird Java 17 oder neuer.
+Java 17 or newer is recommended.
+
+Check the installed versions with:
 
 ```bash
 java -version
 javac -version
 ```
 
-## Starten
+## Build and Run
 
-Das Projekt verwendet kein separates Build-System und kann direkt mit `javac` kompiliert werden.
+The project does not use a dedicated build system and can be compiled directly with `javac`.
+
+### Windows
 
 ```bash
 javac Main.java controller/*.java view/*.java model/*.java
 java -cp ".;view;controller;model" Main
 ```
 
-Der zusätzliche Classpath ist nötig, weil die Klassen in Unterordnern liegen, aber keine `package`-Deklarationen verwenden.
+### Linux and macOS
 
-## Spielmodi
+```bash
+javac Main.java controller/*.java view/*.java model/*.java
+java -cp ".:view:controller:model" Main
+```
 
-**Normalmodus** startet eine reguläre Partie mit Standardaufstellung.
+The additional classpath entries are required because the classes are stored in subdirectories without Java `package` declarations.
 
-**Debug-Modus** startet mit einem leeren Brett. Dadurch lassen sich Spielsituationen gezielt vorbereiten und testen.
+## Game Modes
 
-## Projektstatus
+### Standard Mode
 
-Dieses Projekt ist archiviert und stillgelegt. Kleinere Anpassungen oder Dokumentationskorrekturen sind weiterhin möglich, größere Weiterentwicklungen sind derzeit aber nicht geplant.
+Starts a regular match using the standard checkers starting position.
 
-## Einordnung
+### Debug Mode
 
-Wenn du dieses Repository anschaust, solltest du es vor allem als Hochschulprojekt verstehen: Es zeigt Teamarbeit, objektorientierte Strukturierung, GUI-Grundlagen und die Umsetzung von Spiellogik in Java.
+Starts with an empty board so that specific game situations can be prepared and tested manually.
 
-## Mögliche Future Roadmap
+## Project Context
 
-Falls das Projekt später als Portfolio-Projekt weiterentwickelt werden soll, wäre eine Neuausrichtung in Richtung Datenanalyse oder Data Engineering sinnvoller als rein kosmetische Feature-Erweiterungen.
+This repository contains the completed result of a university team project.
 
-1. Spielzüge und Partieverläufe strukturiert als JSON oder CSV erfassen.
-2. Kennzahlen wie Zuganzahl, Spieldauer, Schlagserien oder Gewinnraten auswerten.
-3. Ein kleines Analyse-Notebook oder Skript zur Datenauswertung ergänzen.
-4. Die Projektstruktur modernisieren, zum Beispiel mit Packages und einem Build-Tool wie Maven oder Gradle.
+The project demonstrates:
+
+- object-oriented Java development
+- GUI implementation
+- separation of responsibilities
+- board-game rule handling
+- collaborative development in a three-person team
+
+## Possible Future Improvements
+
+- Introduce Java package declarations
+- Add Maven or Gradle as a build system
+- Add automated tests for move validation and game rules
+- Improve the separation between game logic and the user interface
+- Add save and load functionality
+- Add move history or replay support
